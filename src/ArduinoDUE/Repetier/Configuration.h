@@ -1305,7 +1305,7 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 
 #define FEATURE_SERVO 1
 // Servo pins on a RAMPS board are 11,6,5,4
-#define SERVO0_PIN 11
+#define SERVO0_PIN 5
 #define SERVO1_PIN -1
 #define SERVO2_PIN -1
 #define SERVO3_PIN -1
