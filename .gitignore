@@ -34,3 +34,7 @@ src/ArduinoAVR/Repetier.zip
 .gcc-flags.json
 .pioenvs/.sconsign.dblite
 .pioenvs/structure.hash
+.pioenvs
+.piolibdeps
+.travis.yml
+lib/readme.txt
