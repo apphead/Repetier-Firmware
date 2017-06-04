@@ -62,7 +62,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Alligator Board rev2         = 501
 
 #define MOTHERBOARD 402
-
+#define RFSERIAL SerialUSB
 #include "pins.h"
 
 // Override pin definitions from pins.h
