@@ -30,3 +30,7 @@ activate*.bat
 src/Repetier-Atmel7/*
 src/ArduinoDUE/Repetier.zip
 src/ArduinoAVR/Repetier.zip
+.clang_complete
+.gcc-flags.json
+.pioenvs/.sconsign.dblite
+.pioenvs/structure.hash
