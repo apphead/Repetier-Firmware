@@ -792,7 +792,7 @@ on this endstop.
 // Set to true to invert the logic of the endstops
 #define ENDSTOP_X_MIN_INVERTING true
 #define ENDSTOP_Y_MIN_INVERTING true
-#define ENDSTOP_Z_MIN_INVERTING true
+#define ENDSTOP_Z_MIN_INVERTING false
 #define ENDSTOP_X_MAX_INVERTING false
 #define ENDSTOP_Y_MAX_INVERTING false
 #define ENDSTOP_Z_MAX_INVERTING true
@@ -1038,8 +1038,8 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 // you can define a predefined x,y position so beding is always the same and
 // can be compensated. Set coordinate to 999999 to ignore positions and just
 // use the position you are at.
-#define ZHOME_X_POS IGNORE_COORDINATE
-#define ZHOME_Y_POS IGNORE_COORDINATE
+#define ZHOME_X_POS 100
+#define ZHOME_Y_POS 150
 
 /* If you have a backlash in both z-directions, you can use this. For most printer, the bed will be pushed down by it's
 own weight, so this is nearly never needed. */
@@ -1368,8 +1368,8 @@ to recalibrate z.
 /** The height is the difference between activated probe position and nozzle height. */
 #define Z_PROBE_HEIGHT 0.78
 /** These scripts are run before resp. after the z-probe is done. Add here code to activate/deactivate probe if needed. */
-#define Z_PROBE_START_SCRIPT "M340 P0 S2200 ; "
-#define Z_PROBE_FINISHED_SCRIPT ""
+#define Z_PROBE_START_SCRIPT "M340 P0 S2200 ;\nM340 P0 S700"
+#define Z_PROBE_FINISHED_SCRIPT "M340 P0 S1500 ;"
 /** Set 1 if you need a hot extruder for good probe results. Normally only required if nozzle is probe. */
 #define Z_PROBE_REQUIRES_HEATING 0
 /** Minimum extruder temperature for probing. If it is lower, it will be increased to that value. */
