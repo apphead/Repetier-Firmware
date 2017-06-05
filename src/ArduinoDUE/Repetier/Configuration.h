@@ -62,7 +62,8 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Alligator Board rev2         = 501
 
 #define MOTHERBOARD 402
-#define RFSERIAL SerialUSB
+//#define RFSERIAL SerialUSB
+#define SERIAL_PORT -1
 #include "pins.h"
 
 // Override pin definitions from pins.h
@@ -234,9 +235,9 @@ controlled by settings in extruder 0 definition. */
 // 102 is MAX31855
 #define EXT0_TEMPSENSOR_TYPE 1
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
-#define EXT0_TEMPSENSOR_PIN TEMP_0_PIN
+#define EXT0_TEMPSENSOR_PIN TEMP_0_PIN //Claude Correct
 // Which pin enables the heater
-#define EXT0_HEATER_PIN HEATER_0_PIN
+#define EXT0_HEATER_PIN HEATER_0_PIN //Claude Correct
 #define EXT0_STEP_PIN E0_STEP_PIN
 #define EXT0_DIR_PIN E0_DIR_PIN
 // set to false/true for normal / inverse direction
@@ -363,9 +364,9 @@ The codes are only executed for multiple extruder when changing the extruder. */
 // 101 is MAX6675
 #define EXT1_TEMPSENSOR_TYPE 1
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
-#define EXT1_TEMPSENSOR_PIN TEMP_2_PIN
+#define EXT1_TEMPSENSOR_PIN TEMP_2_PIN //Claude Correct
 // Which pin enables the heater
-#define EXT1_HEATER_PIN HEATER_2_PIN
+#define EXT1_HEATER_PIN HEATER_2_PIN //Claude Correct
 #define EXT1_STEP_PIN E1_STEP_PIN
 #define EXT1_DIR_PIN E1_DIR_PIN
 // set to false/true for normal/inverse direction
@@ -670,9 +671,9 @@ Value is used for all generic tables created. */
 // set to 0 if you don't have a heated bed
 #define HEATED_BED_SENSOR_TYPE 1
 /** Analog pin of analog sensor to read temperature of heated bed.  */
-#define HEATED_BED_SENSOR_PIN TEMP_1_PIN
+#define HEATED_BED_SENSOR_PIN TEMP_1_PIN //Claude correct
 /** \brief Pin to enable heater for bed. */
-#define HEATED_BED_HEATER_PIN HEATER_1_PIN
+#define HEATED_BED_HEATER_PIN HEATER_1_PIN //Claude correct
 // How often the temperature of the heated bed is set (msec)
 #define HEATED_BED_SET_INTERVAL 3000
 
@@ -831,7 +832,7 @@ on this endstop.
 // Inverting axis direction
 #define INVERT_X_DIR true
 #define INVERT_Y_DIR true
-#define INVERT_Z_DIR false
+#define INVERT_Z_DIR true
 
 //// ENDSTOP SETTINGS:
 // Sets direction of endstops when homing; 1=MAX, -1=MIN
@@ -1503,7 +1504,7 @@ Always hard to say since the other angle is 89° in this case!
 
 /** Set to false to disable SD support: */
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
-#define SDSUPPORT 0
+#define SDSUPPORT 1
 // Uncomment to enable or change card detection pin. With card detection the card is mounted on insertion.
 #define SDCARDDETECT -1
 // Change to true if you get a inserted message on removal.
