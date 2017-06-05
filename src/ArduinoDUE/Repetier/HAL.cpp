@@ -44,7 +44,7 @@ static int adcCounter = 0, adcSamplePos = 0;
 
 static   uint32_t  adcEnable = 0;
 
-char HAL::virtualEeprom[EEPROM_BYTES];
+char HAL::virtualEeprom[EEPROM_BYTES] = {0,0,0,0,0,0,0};
 bool HAL::wdPinged = true;
 volatile uint8_t HAL::insideTimer1 = 0;
 #ifndef DUE_SOFTWARE_SPI
@@ -111,7 +111,7 @@ void HAL::setupTimer() {
   // Timer for stepper motor control
   pmc_enable_periph_clk(TIMER1_TIMER_IRQ );
   //NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ, NVIC_EncodePriority(4, 7, 1)); // highest priority - no surprises here wanted
-  NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ,1); // highest priority - no surprises here wanted
+  NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ,2); // highest priority - no surprises here wanted
 
   TC_Configure(TIMER1_TIMER, TIMER1_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC |
                TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK1);
@@ -164,7 +164,7 @@ void HAL::setupTimer() {
 void HAL::analogStart(void)
 {
 
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || MOTHERBOARD==502
   PIO_Configure(
     g_APinDescription[58].pPort,
     g_APinDescription[58].ulPinType,
@@ -175,7 +175,7 @@ void HAL::analogStart(void)
     g_APinDescription[59].ulPinType,
     g_APinDescription[59].ulPin,
     g_APinDescription[59].ulPinConfiguration);
-#endif // (MOTHERBOARD==500) || (MOTHERBOARD==501)
+#endif // (MOTHERBOARD==500) || (MOTHERBOARD==501) || (MOTHERBOARD==502)
 
   // ensure we can write to ADC registers
   ADC->ADC_WPMR = 0x41444300u; //ADC_WPMR_WPKEY(0);
@@ -217,6 +217,58 @@ void HAL::analogStart(void)
 
   // start first conversion
   ADC->ADC_CR = ADC_CR_START;
+}
+
+#endif
+
+#if EEPROM_AVAILABLE == EEPROM_SDCARD
+
+#if !SDSUPPORT
+#error EEPROM using sd card requires SDCARSUPPORT
+#endif
+
+millis_t eprSyncTime = 0; // in sync
+SdFile eepromFile;
+void HAL::syncEEPROM() { // store to disk if changed
+  millis_t time = millis();
+
+  if (eprSyncTime && (time - eprSyncTime > 15000)) // Buffer writes only every 15 seconds to pool writes
+  {
+    eprSyncTime = 0;
+    bool failed = false;
+    if (!sd.sdactive) // not mounted
+	  {
+		  if (eepromFile.isOpen())
+			  eepromFile.close();
+        Com::printErrorF("Could not write eeprom to sd card - no sd card mounted");
+        Com::println();
+		  return;
+	  }
+
+	  if (!eepromFile.seekSet(0))
+		  failed = true;
+
+	  if(!failed && !eepromFile.write(virtualEeprom, EEPROM_BYTES) == EEPROM_BYTES)
+      failed = true; 
+    
+    if(failed) {
+        Com::printErrorF("Could not write eeprom to sd card");
+        Com::println();
+    }
+  }
+}
+
+void HAL::importEEPROM() {
+    if (eepromFile.isOpen())
+			eepromFile.close();
+		if (!eepromFile.open("eeprom.bin", O_RDWR | O_CREAT | O_SYNC) ||
+			eepromFile.read(virtualEeprom, EEPROM_BYTES) != EEPROM_BYTES)
+		{
+			Com::printFLN(Com::tOpenFailedFile, "eeprom.bin");
+		} else {
+      Com::printFLN("EEPROM read from sd card.");
+    }
+    EEPROM::readDataFromEEPROM(true);
 }
 
 #endif
@@ -285,12 +337,12 @@ uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
 
 #ifndef DUE_SOFTWARE_SPI
 // hardware SPI
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
 bool spiInitMaded = false;
 #endif
 void HAL::spiBegin()
 {
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
   if (spiInitMaded == false)
   {
 #endif        // Configre SPI pins
@@ -314,7 +366,7 @@ void HAL::spiBegin()
     SPI_Configure(SPI0, ID_SPI0, SPI_MR_MSTR |
                   SPI_MR_MODFDIS | SPI_MR_PS);
     SPI_Enable(SPI0);
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
     SET_OUTPUT(DAC0_SYNC);
 #if NUM_EXTRUDER > 1
     SET_OUTPUT(DAC1_SYNC);
@@ -328,14 +380,14 @@ void HAL::spiBegin()
     WRITE(SPI_EEPROM2_CS, HIGH );
     WRITE(SPI_FLASH_CS, HIGH );
     WRITE(SDSS , HIGH );
-#endif// MOTHERBOARD == 500 || MOTHERBOARD == 501
+#endif// MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
     PIO_Configure(
       g_APinDescription[SPI_PIN].pPort,
       g_APinDescription[SPI_PIN].ulPinType,
       g_APinDescription[SPI_PIN].ulPin,
       g_APinDescription[SPI_PIN].ulPinConfiguration);
     spiInit(1);
-#if (MOTHERBOARD==500) || (MOTHERBOARD==501)
+#if (MOTHERBOARD==500) || (MOTHERBOARD==501) || (MOTHERBOARD==502)
     spiInitMaded = true;
   }
 #endif
@@ -344,12 +396,12 @@ void HAL::spiBegin()
 // Due can only go as slow as AVR divider 32 -- slowest Due clock is 329,412 Hz
 void HAL::spiInit(uint8_t spiClock)
 {
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
   if (spiInitMaded == false)
   {
 #endif
     if (spiClock > 4) spiClock = 1;
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
     // Set SPI mode 1, clock, select not active after transfer, with delay between transfers
     SPI_ConfigureNPCS(SPI0, SPI_CHAN_DAC,
                       SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) |
@@ -358,13 +410,13 @@ void HAL::spiInit(uint8_t spiClock)
     SPI_ConfigureNPCS(SPI0, SPI_CHAN_EEPROM1, SPI_CSR_NCPHA |
                       SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) |
                       SPI_CSR_DLYBCT(1));
-#endif// MOTHERBOARD==500 || MOTHERBOARD==501
+#endif// MOTHERBOARD==500 || MOTHERBOARD==501 || (MOTHERBOARD==502)
     // Set SPI mode 0, clock, select not active after transfer, with delay between transfers
     SPI_ConfigureNPCS(SPI0, SPI_CHAN, SPI_CSR_NCPHA |
                       SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) |
                       SPI_CSR_DLYBCT(1));
     SPI_Enable(SPI0);
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
     spiInitMaded = true;
   }
 #endif
@@ -409,7 +461,7 @@ uint8_t HAL::spiReceive()
   //delayMicroseconds(1);
   return SPI0->SPI_RDR;
 }
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
 
 void HAL::spiSend(uint32_t chan, byte b)
 {
@@ -812,10 +864,13 @@ void TIMER1_COMPA_VECTOR ()
   {
     delay = PrintLine::bresenhamStep();
   }
+#if FEATURE_BABYSTEPPING  
   else if (Printer::zBabystepsMissing != 0) {
     Printer::zBabystep();
     delay = Printer::interval;
-  } else {
+  } 
+#endif
+  else {
     if (waitRelax == 0)
     {
 #if USE_ADVANCE
@@ -856,8 +911,8 @@ void TIMER1_COMPA_VECTOR ()
 #if HEATER_PWM_SPEED < 0
 #define HEATER_PWM_SPEED 0
 #endif
-#if HEATER_PWM_SPEED > 2
-#define HEATER_PWM_SPEED 2
+#if HEATER_PWM_SPEED > 4
+#define HEATER_PWM_SPEED 4
 #endif
 
 #if HEATER_PWM_SPEED == 0
@@ -866,9 +921,15 @@ void TIMER1_COMPA_VECTOR ()
 #elif HEATER_PWM_SPEED == 1
 #define HEATER_PWM_STEP 2
 #define HEATER_PWM_MASK 254
-#else
+#elif HEATER_PWM_SPEED == 2
 #define HEATER_PWM_STEP 4
 #define HEATER_PWM_MASK 252
+#elif HEATER_PWM_SPEED == 3
+#define HEATER_PWM_STEP 8
+#define HEATER_PWM_MASK 248
+#elif HEATER_PWM_SPEED == 4
+#define HEATER_PWM_STEP 16
+#define HEATER_PWM_MASK 240
 #endif
 
 #if !defined(COOLER_PWM_SPEED)
@@ -877,8 +938,8 @@ void TIMER1_COMPA_VECTOR ()
 #if COOLER_PWM_SPEED < 0
 #define COOLER_PWM_SPEED 0
 #endif
-#if COOLER_PWM_SPEED > 2
-#define COOLER_PWM_SPEED 2
+#if COOLER_PWM_SPEED > 4
+#define COOLER_PWM_SPEED 4
 #endif
 
 #if COOLER_PWM_SPEED == 0
@@ -887,10 +948,17 @@ void TIMER1_COMPA_VECTOR ()
 #elif COOLER_PWM_SPEED == 1
 #define COOLER_PWM_STEP 2
 #define COOLER_PWM_MASK 254
-#else
+#elif COOLER_PWM_SPEED == 2
 #define COOLER_PWM_STEP 4
 #define COOLER_PWM_MASK 252
+#elif COOLER_PWM_SPEED == 3
+#define COOLER_PWM_STEP 8
+#define COOLER_PWM_MASK 248
+#elif COOLER_PWM_SPEED == 4
+#define COOLER_PWM_STEP 16
+#define COOLER_PWM_MASK 240
 #endif
+
 
 #define pulseDensityModulate( pin, density,error,invert) {uint8_t carry;carry = error + (invert ? 255 - density : density); WRITE(pin, (carry < error)); error = carry;}
 
@@ -1240,6 +1308,7 @@ void RFDoubleSerial::begin(unsigned long baud) {
   RFSERIAL.begin(baud);
   BT_SERIAL.begin(BLUETOOTH_BAUD);
 }
+
 void RFDoubleSerial::end() {
   RFSERIAL.end();
   BT_SERIAL.end();
