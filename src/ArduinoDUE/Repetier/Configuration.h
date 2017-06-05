@@ -1368,7 +1368,7 @@ to recalibrate z.
 /** The height is the difference between activated probe position and nozzle height. */
 #define Z_PROBE_HEIGHT 0.78
 /** These scripts are run before resp. after the z-probe is done. Add here code to activate/deactivate probe if needed. */
-#define Z_PROBE_START_SCRIPT "M340 P0 S2200 ;\nM340 P0 S700"
+#define Z_PROBE_START_SCRIPT "M340 P0 S700 ;"
 #define Z_PROBE_FINISHED_SCRIPT "M340 P0 S1500 ;"
 /** Set 1 if you need a hot extruder for good probe results. Normally only required if nozzle is probe. */
 #define Z_PROBE_REQUIRES_HEATING 0
