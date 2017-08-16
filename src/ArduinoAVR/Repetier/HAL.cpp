@@ -240,7 +240,7 @@ void HAL::setupTimer()
     PWM_OCR = 64;
     PWM_TIMSK |= (1<<PWM_OCIE);
 
-    TCCR1A = 0;  // Steup timer 1 interrupt to no prescale CTC mode
+    TCCR1A = 0;  // Stepper timer 1 interrupt to no prescale CTC mode
     TCCR1C = 0;
     TIMSK1 = 0;
     TCCR1B =  (_BV(WGM12) | _BV(CS10)); // no prescaler == 0.0625 usec tick | 001 = clk/1
@@ -677,12 +677,12 @@ inline void setTimer(uint32_t delay)
       }*/
 }
 
-volatile uint8_t insideTimer1 = 0;
+// volatile uint8_t insideTimer1 = 0;
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
 ISR(TIMER1_COMPA_vect)
 {
-    if(insideTimer1) return;
+    // if(insideTimer1) return;
     uint8_t doExit;
     __asm__ __volatile__ (
         "ldi %[ex],0 \n\t"
@@ -710,7 +710,8 @@ ISR(TIMER1_COMPA_vect)
         :[ex]"=&d"(doExit):[ocr]"i" (_SFR_MEM_ADDR(OCR1A)):"r22","r23" );
 //        :[ex]"=&d"(doExit),[stepperWait]"=&d"(stepperWait):[ocr]"i" (_SFR_MEM_ADDR(OCR1A)):"r22","r23" );
     if(doExit) return;
-    insideTimer1 = 1;
+	cbi(TIMSK1, OCIE1A); // prevent retrigger timer by disabling timer interrupt. Should be faster the guarding with insideTimer1.
+    // insideTimer1 = 1;
     OCR1A = 61000;
     if(PrintLine::hasLines())
     {
@@ -748,7 +749,8 @@ ISR(TIMER1_COMPA_vect)
         OCR1A = 65500; // Wait for next move
     }
     DEBUG_MEMORY;
-    insideTimer1 = 0;
+	sbi(TIMSK1, OCIE1A);
+    //insideTimer1 = 0;
 }
 
 #if !defined(HEATER_PWM_SPEED)
@@ -1010,7 +1012,6 @@ if(fan2Kickstart == 0)
     if(pwm_pos_set[NUM_EXTRUDER] == pwm_count_heater && pwm_pos_set[NUM_EXTRUDER] != HEATER_PWM_MASK) WRITE(HEATED_BED_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
 #endif
-    HAL::allowInterrupts();
     counterPeriodical++; // Approximate a 100ms timer
     if(counterPeriodical >= (int)(F_CPU/40960))
     {
@@ -1030,17 +1031,20 @@ if(fan2Kickstart == 0)
         osAnalogInputBuildup[osAnalogInputPos] += ADCW;
         if(++osAnalogInputCounter[osAnalogInputPos] >= _BV(ANALOG_INPUT_SAMPLE))
         {
+			// update temperatures only when values have been read
+			if(executePeriodical == 0 || osAnalogInputPos >= NUM_ANALOG_TEMP_SENSORS) {
 #if ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE < 12
-            osAnalogInputValues[osAnalogInputPos] =
+				osAnalogInputValues[osAnalogInputPos] =
                 osAnalogInputBuildup[osAnalogInputPos] << (12 - ANALOG_INPUT_BITS - ANALOG_INPUT_SAMPLE);
 #endif
 #if ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE > 12
-            osAnalogInputValues[osAnalogInputPos] =
+				osAnalogInputValues[osAnalogInputPos] =
                 osAnalogInputBuildup[osAnalogInputPos] >> (ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE - 12);
 #endif
 #if ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE == 12
-            osAnalogInputValues[osAnalogInputPos] = osAnalogInputBuildup[osAnalogInputPos];
+				osAnalogInputValues[osAnalogInputPos] = osAnalogInputBuildup[osAnalogInputPos];
 #endif
+			}
             osAnalogInputBuildup[osAnalogInputPos] = 0;
             osAnalogInputCounter[osAnalogInputPos] = 0;
             // Start next conversion

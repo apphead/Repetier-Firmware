@@ -34,6 +34,7 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_back, UI_TEXT_BACK_ID, UI_ACTION_BACK)
 
 // new submenues and entries
 
+UI_MENU_HEADLINE_T(ui_empty,UI_TEXT_EMPTY_ID)
 UI_MENU_HEADLINE_T(ui_exy1a,UI_CTEXT_XY_P1_1_ID)
 UI_MENU_HEADLINE_T(ui_exy1b,UI_CTEXT_XY_P1_2_ID)
 UI_MENU_HEADLINE_T(ui_exy1c,UI_CTEXT_XY_P1_3_ID)
@@ -63,27 +64,57 @@ UI_STICKYMENU(ui_exy3,UI_EXY3_ITEMS,5)
 
 UI_MENU_ACTIONCOMMAND_T(ui_calex,UI_CTEXT_CALIBRATE_EXTRUDERS_ID,UI_ACTION_CALEX)
 UI_MENU_ACTIONCOMMAND_T(ui_calex_xy,UI_CTEXT_CALIBRATE_XY_ID,UI_ACTION_CALEX_XY)
+//added by FELIX
+//====================
+#ifdef TEC4
+#else
 UI_MENU_ACTIONCOMMAND_T(ui_calex_z,UI_CTEXT_CALIBRATE_Z_ID,UI_ACTION_CALEX_Z)
+#endif
 
+#ifdef TEC4
+#define UI_CALEXTR_SUBITEMS {&ui_menu_back, &ui_calex_xy}
+UI_MENU(ui_calextr_sub,UI_CALEXTR_SUBITEMS,2)
+#else
 #define UI_CALEXTR_SUBITEMS {&ui_menu_back, &ui_calex_xy,&ui_calex_z}
 UI_MENU(ui_calextr_sub,UI_CALEXTR_SUBITEMS,3)
+#endif
+//====================
+//added by FELIX
 
 UI_WIZARD4_T(ui_msg_printxycal, UI_ACTION_STATE,UI_CTEXT_PRINTXYCAL1_ID, UI_CTEXT_PRINTXYCAL2_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
 UI_WIZARD4_T(ui_msg_extzcalib, UI_ACTION_STATE,UI_CTEXT_EXTZCAL1_ID, UI_CTEXT_EXTZCAL2_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
-UI_WIZARD4_T(ui_msg_clearbed_zcalib, UI_ACTION_CALEX_Z2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_OK_ID)
+UI_WIZARD5_T(ui_msg_clearbed_zcalib, UI_ACTION_CALEX_Z2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
 
 UI_MENU_ACTIONCOMMAND_T(ui_preheatcool1,UI_CTEXT_PREHEATCOOL_ID,UI_ACTION_PRECOOL1)
+#if NUM_EXTRUDER > 1
 UI_MENU_ACTIONCOMMAND_T(ui_preheatcool2,UI_CTEXT_PREHEATCOOL2_ID,UI_ACTION_PRECOOL2)
+#endif
 UI_MENU_ACTIONCOMMAND_T(ui_removebed,UI_CTEXT_REMOVEBED_ID,UI_ACTION_REMOVEBED)
+
+UI_WIZARD4_T(cui_msg_measuring, UI_ACTION_STATE,UI_TEXT_EMPTY_ID, UI_TEXT_MEASURING_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
+UI_WIZARD4(cui_msg_preparing, UI_ACTION_STATE,"", "   Preparing ...", "", "   Please wait")
+              
+UI_WIZARD4(cui_calib_zprobe_info, UI_ACTION_CZREFH_INFO, "   Place the Felix","   calibration card"," between the Nozzle","   and Build PLT.")
+UI_WIZARD4(cui_calib_zprobe, UI_ACTION_CZREFH, "  Rotate the button","   until you feel","   slight friction","    on the card.")
+UI_WIZARD4(cui_calib_zprobe_succ, UI_ACTION_CZREFH_SUCC, "     Build PLT."," Levelled Correctly","","     >>> OK <<<")
+UI_WIZARD4(cui_calib_zprobe_dist, UI_ACTION_STATE, "", "   now measuring", "    buildsurface", "")
+UI_MENU_HEADLINE(ui_halfw," Max. 10" cDEG)
+UI_MENU_HEADLINE(ui_halfa," Turn back: %bb")
+UI_MENU_HEADLINE(ui_halfb," Turn front: %ba")
+UI_MENU_ACTIONCOMMAND(ui_halfc,"Measure Again",UI_ACTION_HALFAUTO_LEV2)
+UI_MENU_ACTIONCOMMAND(ui_halfd,"Cancel",UI_ACTION_HALFAUTO_LEV3)
+
+#define UI_HALF_ITEMS {&ui_halfw,&ui_halfa,&ui_halfb,&ui_halfc,&ui_halfd}
+UI_STICKYMENU(ui_half_show,UI_HALF_ITEMS,5)
 
 
 // Define precision for temperatures. With small displays only integer values fit.
-#define UI_TEMP_PRECISION 1
+#define UI_TEMP_PRECISION 0
 
 // Define precision for temperatures. With small displays only integer values fit.
 #ifndef UI_TEMP_PRECISION
 #if UI_COLS>16
-#define UI_TEMP_PRECISION 1
+#define UI_TEMP_PRECISION 0
 #else
 #define UI_TEMP_PRECISION 0
 #endif
@@ -180,9 +211,9 @@ UI_PAGE6_T(ui_page4, UI_TEXT_ACTION_XPOSITION4A_ID, UI_TEXT_ACTION_YPOSITION4A_I
   Merge pages together. Use the following pattern:
   #define UI_PAGES {&name1,&name2,&name3}
 */
-#define UI_PAGES {&ui_page1 UI_PRINTTIME_PAGES ,&ui_page4 UI_EXTRUDERS_PAGES}
+#define UI_PAGES {/*&ui_page1 UI_PRINTTIME_PAGES ,*/&ui_page4 UI_EXTRUDERS_PAGES}
 // How many pages do you want to have. Minimum is 1.
-#define UI_NUM_PAGES 2+UI_PRINTTIME_COUNT+UI_EXTRUDERS_PAGES_COUNT
+#define UI_NUM_PAGES 1/*+UI_PRINTTIME_COUNT*/+UI_EXTRUDERS_PAGES_COUNT
 
 #elif UI_ROWS >= 4
 #if HAVE_HEATED_BED
@@ -239,9 +270,9 @@ UI_PAGE4_T(ui_page4, UI_TEXT_PRINT_TIME_ID, UI_TEXT_PRINT_TIME_VALUE_ID, UI_TEXT
   Merge pages together. Use the following pattern:
   #define UI_PAGES {&name1,&name2,&name3}
 */
-#define UI_PAGES {&ui_page1, &ui_page2, &ui_page3 UI_PRINTTIME_PAGES}
+#define UI_PAGES {/*&ui_page1,*/ &ui_page2, &ui_page3 UI_PRINTTIME_PAGES}
 // How many pages do you want to have. Minimum is 1.
-#define UI_NUM_PAGES 3+UI_PRINTTIME_COUNT
+#define UI_NUM_PAGES 2+UI_PRINTTIME_COUNT
 #else
 #if HAVE_HEATED_BED
 UI_PAGE2_T(ui_page1, UI_TEXT_PAGE_EXTRUDER_ID, UI_TEXT_PAGE_BED_ID)
@@ -254,9 +285,9 @@ UI_PAGE2_T(ui_page3, UI_TEXT_ACTION_ZPOSITION4A_ID, UI_TEXT_STATUS_ID)
   Merge pages together. Use the following pattern:
   #define UI_PAGES {&name1,&name2,&name3}
 */
-#define UI_PAGES {&ui_page1,&ui_page2,&ui_page3}
+#define UI_PAGES {/* &ui_page1,*/ &ui_page2,&ui_page3}
 // How many pages do you want to have. Minimum is 1.
-#define UI_NUM_PAGES 3
+#define UI_NUM_PAGES 2
 #endif
 
 /* ============ MENU definition ================
@@ -448,8 +479,8 @@ UI_WIZARD4_T(ui_msg_defectsensor, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI
 UI_WIZARD4_T(ui_msg_slipping, UI_ACTION_MESSAGE,  UI_TEXT_NOTIFICATION_ID, UI_TEXT_SLIPPING_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
 UI_WIZARD4_T(ui_msg_leveling_error, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI_TEXT_LEVELING_ERROR_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
 UI_WIZARD4_T(ui_msg_calibration_error, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI_TEXT_CALIBRATION_ERROR_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
-UI_WIZARD4_T(ui_msg_clearbed1, UI_ACTION_AUTOLEVEL2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_OK_ID)
-UI_WIZARD4_T(ui_msg_clearbed2, UI_ACTION_MEASURE_DISTORTION2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_OK_ID)
+UI_WIZARD5_T(ui_msg_clearbed1, UI_ACTION_AUTOLEVEL2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
+UI_WIZARD5_T(ui_msg_clearbed2, UI_ACTION_MEASURE_DISTORTION2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_EMPTY_ID,  UI_TEXT_OK_ID)
 
 UI_WIZARD4_T(ui_msg_calibrating_bed, UI_ACTION_STATE,UI_TEXT_EMPTY_ID, UI_TEXT_CALIBRATING_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
 UI_WIZARD4_T(ui_msg_homing, UI_ACTION_STATE,UI_TEXT_EMPTY_ID, UI_TEXT_HOMING_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
@@ -792,17 +823,32 @@ UI_MENU_ACTION2_T(ui_menu_maxinactive2, UI_ACTION_MAX_INACTIVE, UI_TEXT_POWER_IN
 UI_MENU_CHANGEACTION_T(ui_menu_general_baud, UI_TEXT_BAUDRATE_ID, UI_ACTION_BAUDRATE)
 UI_MENU_ACTIONSELECTOR_T(ui_menu_general_stepper_inactive, UI_TEXT_STEPPER_INACTIVE_ID, ui_menu_stepper2)
 UI_MENU_ACTIONSELECTOR_T(ui_menu_general_max_inactive, UI_TEXT_POWER_INACTIVE_ID, ui_menu_maxinactive2)
+#ifdef ZPROBE_HEIGHT_ROUTINE
+UI_MENU_ACTIONCOMMAND(ui_menu_calib_probe,"Calibrate Z-Probe",UI_ACTION_START_CZREFH);
+#define UI_CALIB_PROBE_ENTRY ,&ui_menu_calib_probe
+#define UI_CALIB_PROBE_COUNT 1
+#else
+#define UI_CALIB_PROBE_ENTRY
+#define UI_CALIB_PROBE_COUNT 0
+#endif
+
 #if FEATURE_AUTOLEVEL
+#ifdef HALFAUTOMATIC_LEVELING
+UI_MENU_ACTIONCOMMAND_T(ui_menu_autolevelbed,UI_TEXT_AUTOLEVEL_BED_ID,UI_ACTION_HALFAUTO_LEV);
+#define UI_TOOGLE_AUTOLEVEL_ENTRY ,&ui_menu_autolevelbed
+#define UI_TOGGLE_AUTOLEVEL_COUNT 1
+#else
 UI_MENU_ACTIONCOMMAND_T(ui_menu_autolevelbed,UI_TEXT_AUTOLEVEL_BED_ID,UI_ACTION_AUTOLEVEL);
 UI_MENU_ACTIONCOMMAND_T(ui_menu_toggle_autolevel, UI_TEXT_AUTOLEVEL_ONOFF_ID, UI_ACTION_AUTOLEVEL_ONOFF)
 #define UI_TOOGLE_AUTOLEVEL_ENTRY ,&ui_menu_autolevelbed,&ui_menu_toggle_autolevel
 #define UI_TOGGLE_AUTOLEVEL_COUNT 2
+#endif
 #else
 #define UI_TOOGLE_AUTOLEVEL_ENTRY
 #define UI_TOGGLE_AUTOLEVEL_COUNT 0
 #endif
-#define UI_MENU_GENERAL {UI_MENU_ADDCONDBACK &ui_menu_general_baud,&ui_menu_general_stepper_inactive,&ui_menu_general_max_inactive UI_TOOGLE_AUTOLEVEL_ENTRY}
-UI_MENU(ui_menu_general, UI_MENU_GENERAL, 3 + UI_MENU_BACKCNT + UI_TOGGLE_AUTOLEVEL_COUNT)
+#define UI_MENU_GENERAL {UI_MENU_ADDCONDBACK &ui_menu_general_baud,&ui_menu_general_stepper_inactive,&ui_menu_general_max_inactive UI_TOOGLE_AUTOLEVEL_ENTRY UI_CALIB_PROBE_ENTRY}
+UI_MENU(ui_menu_general, UI_MENU_GENERAL, 3 + UI_MENU_BACKCNT + UI_TOGGLE_AUTOLEVEL_COUNT + UI_CALIB_PROBE_COUNT)
 
 
 // **** Bed Coating Menu
@@ -956,10 +1002,15 @@ UI_MENU_SUBMENU_FILTER_T(ui_menu_quick_changefil_printing,UI_TEXT_CHANGE_FILAMEN
 #define UI_CHANGE_FIL_ENT
 #define UI_CHANGE_FIL_ENT_PRINTING
 #endif
-
-#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all ,&ui_preheatcool1,&ui_preheatcool2,&ui_removebed \
-    UI_CHANGE_FIL_ENT ,&ui_menu_autolevelbed,&ui_calex , &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp}
-UI_MENU(ui_menu_quick, UI_MENU_QUICK, 9 + UI_MENU_BACKCNT + UI_CHANGE_FIL_CNT)
+UI_MENU_SUBMENU_FILTER_T(ui_menu_move, UI_TEXT_POSITION_ID, ui_menu_positions,0,MENU_MODE_PRINTING)
+#if NUM_EXTRUDER > 1
+#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_preheatcool2,&ui_removebed UI_CHANGE_FIL_ENT ,&ui_menu_autolevelbed UI_CALIB_PROBE_ENTRY, &ui_calex ,&ui_menu_move \
+      , &ui_menu_quick_stopstepper, &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp}
+#else
+#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_preheatcool1,&ui_removebed UI_CHANGE_FIL_ENT ,&ui_menu_autolevelbed UI_CALIB_PROBE_ENTRY, &ui_calex ,&ui_menu_move \
+      , &ui_menu_quick_stopstepper, &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp}
+#endif      
+UI_MENU(ui_menu_quick, UI_MENU_QUICK, 9 + UI_MENU_BACKCNT + UI_CHANGE_FIL_CNT+ UI_CALIB_PROBE_COUNT)
 
 UI_MENU_HEADLINE_T(ui_menu_askstop_head, UI_TEXT_STOP_PRINT_ID)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_sd_askstop_no, UI_TEXT_NO_ID, UI_ACTION_BACK)
@@ -979,6 +1030,11 @@ UI_MENU(ui_menu_askstop, UI_MENU_ASKSTOP, 3)
 
 #if SDSUPPORT
 
+// Dummy print menu to show missing card
+UI_MENU_HEADLINE(ui_menus_sd_pinsert, "Please insert SD card")
+#define UI_MENU_SD_NOCARD {UI_MENU_ADDCONDBACK &ui_menus_sd_pinsert}
+UI_MENU(ui_menu_sd_nocard, UI_MENU_SD_NOCARD, UI_MENU_BACKCNT + 1)
+UI_MENU_SUBMENU_FILTER_T(ui_menu_sd_printfile2, UI_TEXT_PRINT_FILE_ID,     ui_menu_sd_nocard,    0, MENU_MODE_SD_MOUNTED + MENU_MODE_SD_PRINTING)
 
 #define UI_MENU_SD_FILESELECTOR {&ui_menu_back}
 UI_MENU_FILESELECT(ui_menu_sd_fileselector, UI_MENU_SD_FILESELECTOR, 1)
@@ -988,8 +1044,8 @@ UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_continue,  UI_TEXT_CONTINUE_PRINT_ID, 
 // two versions of stop. Second is with security question since pausing can trigger stop with bad luck!
 //UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_stop,      UI_TEXT_STOP_PRINT_ID,     UI_ACTION_SD_STOP,     MENU_MODE_SD_PRINTING, 0)
 UI_MENU_SUBMENU_FILTER_T(ui_menu_sd_stop, UI_TEXT_STOP_PRINT_ID, ui_menu_askstop, MENU_MODE_SD_PRINTING, 0 )
-#define SD_PRINTFILE_ENTRY &ui_menu_sd_printfile,
-#define SD_PRINTFILE_ENTRY_CNT 1
+#define SD_PRINTFILE_ENTRY &ui_menu_sd_printfile,&ui_menu_sd_printfile2,
+#define SD_PRINTFILE_ENTRY_CNT 2
 #if SDCARDDETECT > -1
 #define UI_MOUNT_CNT 0
 #define UI_MOUNT_CMD
@@ -1095,7 +1151,6 @@ UI_MENU_CHANGEACTION_T(ui_menu_cext_advancel, UI_TEXT_EXTR_ADVANCE_L_ID, UI_ACTI
 #endif
 UI_MENU_CHANGEACTION_T(       ui_menu_cext_manager, UI_TEXT_EXTR_MANAGER_ID, UI_ACTION_EXTR_HEATMANAGER)
 UI_MENU_CHANGEACTION_T(       ui_menu_cext_pmax,    UI_TEXT_EXTR_PMAX_ID,    UI_ACTION_PID_MAX)
-#if TEMP_PID
 UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_pgain,   UI_TEXT_EXTR_PGAIN_ID,   UI_ACTION_PID_PGAIN, MENU_MODE_FULL_PID, 0)
 UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_igain,   UI_TEXT_EXTR_IGAIN_ID,   UI_ACTION_PID_IGAIN,  MENU_MODE_FULL_PID, 0)
 UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_dgain,   UI_TEXT_EXTR_DGAIN_ID,   UI_ACTION_PID_DGAIN,  MENU_MODE_FULL_PID, 0)
@@ -1105,10 +1160,6 @@ UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_pgain_dt,   UI_TEXT_EXTR_DEADTIME_ID,
 UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_dmax_dt,    UI_TEXT_EXTR_DMAX_DT_ID,    UI_ACTION_DRIVE_MAX,  MENU_MODE_DEADTIME, 0)
 #define UI_MENU_PIDCOND ,&ui_menu_cext_manager,&ui_menu_cext_pgain,&ui_menu_cext_igain,&ui_menu_cext_dgain,&ui_menu_cext_dmin,&ui_menu_cext_dmax, &ui_menu_cext_pgain_dt,&ui_menu_cext_dmax_dt,&ui_menu_cext_pmax
 #define UI_MENU_PIDCNT 9
-#else
-#define UI_MENU_PIDCOND ,&ui_menu_cext_manager, &ui_menu_cext_pmax
-#define UI_MENU_PIDCNT 2
-#endif
 #if NUM_EXTRUDER > 5 && MIXING_EXTRUDER == 0
 UI_MENU_CHANGEACTION_T(ui_menu_cext_xoffset, UI_TEXT_EXTR_XOFF_ID, UI_ACTION_X_OFFSET)
 UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset, UI_TEXT_EXTR_YOFF_ID, UI_ACTION_Y_OFFSET)
@@ -1143,13 +1194,8 @@ UI_MENU(ui_menu_cextr, UI_MENU_CEXTR, 7 + UI_MENU_BACKCNT + UI_MENU_PIDCNT + UI_
 
 // HeatBed Configuration - use menu actions from extruder configuration
 #if HAVE_HEATED_BED
-#if TEMP_PID
-#define UI_MENU_BEDCONF {UI_MENU_ADDCONDBACK &ui_menu_cext_manager,&ui_menu_cext_pgain,&ui_menu_cext_igain,&ui_menu_cext_dgain,&ui_menu_cext_dmin,&ui_menu_cext_dmax,&ui_menu_cext_pgain_dt,&ui_menu_cext_pmax}
-UI_MENU(ui_menu_bedconf, UI_MENU_BEDCONF, 8 + UI_MENU_BACKCNT)
-#else
-#define UI_MENU_BEDCONF {UI_MENU_ADDCONDBACK &ui_menu_cext_manager, &ui_menu_cext_pmax}
-UI_MENU(ui_menu_bedconf, UI_MENU_BEDCONF, 2 + UI_MENU_BACKCNT)
-#endif
+#define UI_MENU_BEDCONF {UI_MENU_ADDCONDBACK UI_MENU_COATING_COND &ui_menu_cext_manager,&ui_menu_cext_pgain,&ui_menu_cext_igain,&ui_menu_cext_dgain,&ui_menu_cext_dmin,&ui_menu_cext_dmax,&ui_menu_cext_pgain_dt,&ui_menu_cext_pmax}
+UI_MENU(ui_menu_bedconf, UI_MENU_BEDCONF, 8 + UI_MENU_BACKCNT + UI_MENU_COATING_CNT)
 #endif
 
 
@@ -1195,9 +1241,8 @@ UI_MENU_SUBMENU_T(ui_menu_conf_delta, UI_TEXT_ZCALIB_ID, ui_menu_delta)
 #define UI_MENU_DELTA_COND
 #define UI_MENU_DELTA_CNT 0
 #endif
-UI_MENU_SUBMENU_FILTER_T(ui_menu_move, UI_TEXT_POSITION_ID, ui_menu_positions,0,MENU_MODE_PRINTING)
-#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK LANGMENU_ENTRY UI_MENU_COATING_COND &ui_menu_general_baud,&ui_menu_sub_info,&ui_menu_move,&ui_menu_conf_extr UI_MENU_BEDCONF_COND UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
-UI_MENU(ui_menu_configuration, UI_MENU_CONFIGURATION, UI_MENU_BACKCNT + LANGMENU_COUNT + UI_MENU_EEPROM_CNT + UI_MENU_BEDCONF_CNT + UI_MENU_DELTA_CNT + UI_MENU_SL_CNT + UI_MENU_COATING_CNT + 4)
+#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &ui_menu_sub_info, LANGMENU_ENTRY &ui_menu_conf_extr UI_MENU_BEDCONF_COND ,&ui_menu_general_baud  UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
+UI_MENU(ui_menu_configuration, UI_MENU_CONFIGURATION, UI_MENU_BACKCNT + LANGMENU_COUNT + UI_MENU_EEPROM_CNT + UI_MENU_BEDCONF_CNT + UI_MENU_DELTA_CNT + UI_MENU_SL_CNT + 3)
 
 
 // **** Preheat menu ****
@@ -1297,8 +1342,8 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_toggle_distortion,UI_TEXT_DISTORTION_CORR_ID, UI
 #define UI_DISTORTION_COUNT 0
 #endif
 
-#define UI_MENU_SETUP {UI_MENU_ADDCONDBACK &ui_debug UI_MENU_PREHEAT UI_TOOGLE_AUTOLEVEL_ENTRY UI_DISTORTION_ENTRY UI_CAL_ZHEIGHT_ENTRY ,&ui_calex ,&ui_menu_fan_ignoreM106}
-UI_MENU(ui_menu_setup, UI_MENU_SETUP, UI_MENU_BACKCNT + 3 + UI_MENU_PREHEAT_CNT + UI_TOGGLE_AUTOLEVEL_COUNT + UI_DISTORTION_COUNT + UI_CAL_ZHEIGHT_CNT)
+#define UI_MENU_SETUP {UI_MENU_ADDCONDBACK &ui_debug UI_MENU_PREHEAT UI_TOOGLE_AUTOLEVEL_ENTRY UI_CALIB_PROBE_ENTRY UI_DISTORTION_ENTRY UI_CAL_ZHEIGHT_ENTRY ,&ui_calex ,&ui_menu_fan_ignoreM106}
+UI_MENU(ui_menu_setup, UI_MENU_SETUP, UI_MENU_BACKCNT + 3 + UI_MENU_PREHEAT_CNT + UI_TOGGLE_AUTOLEVEL_COUNT + UI_DISTORTION_COUNT + UI_CAL_ZHEIGHT_CNT + UI_CALIB_PROBE_COUNT)
 UI_MENU_SUBMENU_FILTER_T(ui_setup, UI_TEXT_SETUP_ID, ui_menu_setup,0,MENU_MODE_PRINTING)
 
 // Stop print security question
@@ -1309,7 +1354,7 @@ UI_MENU_SUBMENU_FILTER_T(ui_setup, UI_TEXT_SETUP_ID, ui_menu_setup,0,MENU_MODE_P
 // stop/pause/continue entries
 
 UI_MENU_ACTIONCOMMAND_FILTER_T(ui_pause,UI_TEXT_PAUSE_PRINT_ID,UI_ACTION_PAUSE,MENU_MODE_PRINTING,MENU_MODE_PAUSED)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_continue,UI_TEXT_CONTINUE_PRINT_ID,UI_ACTION_CONTINUE,MENU_MODE_PRINTING+MENU_MODE_PAUSED,0)
+UI_MENU_ACTIONCOMMAND_FILTER_T(ui_continue,UI_TEXT_CONTINUE_PRINT_ID,UI_ACTION_CONTINUE,MENU_MODE_PAUSED,0)
 UI_MENU_ACTIONCOMMAND_FILTER_T(ui_stop,UI_TEXT_STOP_PRINT_ID,UI_ACTION_STOP,MENU_MODE_PRINTING,MENU_MODE_PAUSED)
 
 
@@ -1317,9 +1362,9 @@ UI_MENU_SUBMENU_FILTER_T(ui_menu_control, UI_TEXT_QUICK_SETTINGS_ID, ui_menu_qui
 UI_MENU_SUBMENU_FILTER_T(ui_menu_extrudercontrol, UI_TEXT_EXTRUDER_ID, ui_menu_extruder,0,MENU_MODE_PRINTING)
 
 UI_MENU_SUBMENU_FILTER_T(ui_menu_settings, UI_TEXT_CONFIGURATION_ID, ui_menu_configuration,0,MENU_MODE_PRINTING)
-#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK &ui_menu_control ,&ui_stop,&ui_pause,&ui_continue \
-    UI_TEMP0_PRINTING UI_TEMP1_PRINTING UI_TEMP2_PRINTING UI_TEMP3_PRINTING UI_TEMP4_PRINTING UI_TEMP5_PRINTING \
-    UI_BED_TEMP_PRINTING ,&ui_menu_quick_speedmultiply_printing,&ui_menu_quick_flowmultiply_printing UI_CHANGE_FIL_ENT_PRINTING UI_FANSPEED_PRINTING UI_FAN2SPEED_PRINTING BABY_ENTRY_PRINTING , SD_PRINTFILE_ENTRY \
+#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK &ui_menu_control ,&ui_stop,&ui_pause,&ui_continue UI_CHANGE_FIL_ENT_PRINTING\
+    BABY_ENTRY_PRINTING  ,&ui_menu_quick_speedmultiply_printing,&ui_menu_quick_flowmultiply_printing UI_TEMP0_PRINTING UI_TEMP1_PRINTING UI_TEMP2_PRINTING UI_TEMP3_PRINTING UI_TEMP4_PRINTING UI_TEMP5_PRINTING \
+    UI_BED_TEMP_PRINTING  UI_FANSPEED_PRINTING UI_FAN2SPEED_PRINTING  , SD_PRINTFILE_ENTRY \
     &ui_menu_settings}
    // &ui_menu_move, &ui_menu_extrudercontrol, 
     

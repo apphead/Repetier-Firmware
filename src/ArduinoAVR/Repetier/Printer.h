@@ -213,6 +213,13 @@ public:
 	    return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0;
 #endif
     }
+	static INLINE bool anyEndstopHit() {
+#ifdef EXTENDED_ENDSTOPS
+		return lastState != 0 || lastState2 != 0;
+#else
+		return lastState != 0;
+#endif
+	}
     static INLINE void resetAccumulator() {
         accumulator = 0;
 #ifdef EXTENDED_ENDSTOPS
@@ -720,6 +727,11 @@ public:
         return flag1 & PRINTER_FLAG1_HOMED_ALL;
     }
 
+	static INLINE void unsetHomedAll() {
+		flag1 &= ~PRINTER_FLAG1_HOMED_ALL;
+		flag3 &= ~(PRINTER_FLAG3_X_HOMED | PRINTER_FLAG3_Y_HOMED | PRINTER_FLAG3_Z_HOMED);
+	}
+
     static INLINE void updateHomedAll()
     {
 		bool b = isXHomed() && isYHomed() && isZHomed();
@@ -931,6 +943,10 @@ public:
 
     static INLINE void setJamcontrolDisabled(uint8_t b)
     {
+	#if EXTRUDER_JAM_CONTROL
+		if(b)
+			Extruder::markAllUnjammed();
+	#endif
         flag2 = (b ? flag2 | PRINTER_FLAG2_JAMCONTROL_DISABLED : flag2 & ~PRINTER_FLAG2_JAMCONTROL_DISABLED);
         Com::printFLN(PSTR("Jam control disabled:"),b);
     }
@@ -1319,6 +1335,9 @@ public:
     static void pausePrint();
     static void continuePrint();
     static void stopPrint();
+#if FEATURE_Z_PROBE
+	static void prepareForProbing();
+#endif
 };
 
 #endif // PRINTER_H_INCLUDED

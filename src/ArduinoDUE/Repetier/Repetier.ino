@@ -71,7 +71,7 @@ RepRap M Codes
 
 - M104 - Set extruder target temp
 - M105 - Read current temp
-- M106 S<speed> P<fan> - Fan on speed = 0..255, P = 0 or 1, 0 is default and can be omitted
+- M106 S<speed> P<fan> I<ignore> - Fan on speed = 0..255, P = 0 or 1, 0 is default and can be omitted, I1 = Ignore M106/M107 from now on, I0 = disable ignore
 - M107 P<fan> - Fan off, P = 0 or 1, 0 is default and can be omitted
 - M109 - Wait for extruder current temp to reach target temp. Same params as M104
 - M114 S1 - Display current position, S1 = also write position in steps
@@ -117,6 +117,7 @@ Custom M Codes
 - M155 S<1/0> Enable/disable auto report temperatures. When enabled firmware will emit temperatures every second.
 - M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
 - M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
+- M170 B<bedtemp> T<extruderid> S<extrudertemp> L0 - Set preset temperatures for extruder (T+S) or bed (B) or list settings (L0)
 - M190 - Wait for bed current temp to reach target temp. Same params as M109
 - M200 T<extruder> D<diameter> - Use volumetric extrusion. Set D0 or omit D to disable volumetric extr. Omit T for current extruder.
 - M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
@@ -139,7 +140,8 @@ Custom M Codes
 - M290 Z<babysteps> - Correct by adding baby steps for Z mm
 - M300 S<Frequency> P<DurationMillis> play frequency
 - M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will disallow.
-- M303 P<extruder/bed> S<printTemerature> X0 R<Repetitions>- Auto detect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM. R is number of cycles.
+- M303 P<extruder/bed> S<printTemerature> X0 R<Repetitions> C<method>- Auto detect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM. R is number of cycles.
+				method 0 = classic, 1 = some overshoot, 2 = no overshoot
 - M320 S<0/1> - Activate auto level, S1 stores it in eeprom
 - M321 S<0/1> - Deactivate auto level, S1 stores it in eeprom
 - M322 - Reset auto level matrix
@@ -165,7 +167,7 @@ Custom M Codes
 - M531 filename - Define filename being printed
 - M532 X<percent> L<curLayer> - update current print state progress (X=0..100) and layer L
 - M600 Change filament
-- M601 S<1/0> - Pause extruders. Paused extrudes disable heaters and motor. Continue reheats extruder to old temp.
+- M601 S<1/0> B<1/0> P<1/0> - Pause extruders. B1 also pauses heated bed. Paused extrudes disable heaters and motor. Continue (S0) reheats extruder to old temp. P0 does not wait for target temperature.
 - M602 S<1/0> P<1/0>- Debug jam control (S) Disable jam control (P). If enabled it will log signal changes and will not trigger jam errors!
 - M603 - Simulate a jam
 - M604 X<slowdownSteps> Y<errorSteps> Z<slowdownTo> T<extruderId> - Set jam detection values on a per extruder basis. If not set it uses defaults from Configuration.h

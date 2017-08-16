@@ -1169,7 +1169,6 @@ if(fan2Kickstart == 0)
   if (pwm_pos_set[NUM_EXTRUDER] == pwm_count_heater && pwm_pos_set[NUM_EXTRUDER] != HEATER_PWM_MASK) WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
 #endif
-  //noInt.unprotect();
   counterPeriodical++; // Appxoimate a 100ms timer
   if (counterPeriodical >= 390) //  (int)(F_CPU/40960))
   {
@@ -1201,7 +1200,9 @@ if(fan2Kickstart == 0)
         adcSamplesMax[i] = 0;
         osAnalogSamplesSum[i] -= osAnalogSamples[i][adcSamplePos];
         osAnalogSamplesSum[i] += (osAnalogSamples[i][adcSamplePos] = osAnalogInputBuildup[i] >> ANALOG_INPUT_SAMPLE);
-        osAnalogInputValues[i] = osAnalogSamplesSum[i] / ANALOG_INPUT_MEDIAN;
+        if(executePeriodical == 0 || i >= NUM_ANALOG_TEMP_SENSORS) {
+          osAnalogInputValues[i] = osAnalogSamplesSum[i] / ANALOG_INPUT_MEDIAN;
+        }
         osAnalogInputBuildup[i] = 0;
       } // adcCounter >= NUM_ADC_SAMPLES
     } // for i

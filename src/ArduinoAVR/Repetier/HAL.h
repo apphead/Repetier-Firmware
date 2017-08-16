@@ -93,6 +93,12 @@ All known Arduino boards use 64. This value is needed for the extruder timing. *
 #define	SET_INPUT(IO)  pinMode(IO, INPUT)
 #define	SET_OUTPUT(IO)  pinMode(IO, OUTPUT)
 #endif
+#ifndef cbi
+#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
+#endif
+#ifndef sbi
+#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
+#endif
 
 class InterruptProtectedBlock
 {
@@ -571,7 +577,7 @@ public:
     {
         cli();
     }
-    static inline unsigned long timeInMilliseconds()
+    static inline millis_t timeInMilliseconds()
     {
         return millis();
     }

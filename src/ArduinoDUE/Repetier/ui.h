@@ -251,7 +251,7 @@
 #define UI_ACTION_MEASURE_ZPROBE_HEIGHT2 1239
 #define UI_ACTION_MEASURE_ZP_REALZ      1240
 #define UI_ACTION_Z_OFFSET              1241
-
+#define UI_ACTION_TOGGLE_JAMCONTROL     1242
 
 // 1500-1699 reserved for custom actions
 
@@ -376,7 +376,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
   if(c4>=0) {SET_INPUT(c4);WRITE(c4,HIGH);}if(r1>=0)SET_OUTPUT(r1);if(r2>=0)SET_OUTPUT(r2);if(r3>=0)SET_OUTPUT(r3);if(r4>=0)SET_OUTPUT(r4);\
   if(r1>=0)WRITE(r1,LOW);if(r2>=0)WRITE(r2,LOW);if(r3>=0)WRITE(r3,LOW);if(r4>=0)WRITE(r4,LOW);
 //      out.print_int_P(PSTR("r4=>c1:"),READ(c1));out.print_int_P(PSTR(" c2:"),READ(c2));out.print_int_P(PSTR(" c3:"),READ(c3));out.println_int_P(PSTR(" c4:"),READ(c4));
-#define UI_KEYS_MATRIX(r1,r2,r3,r4,c1,c2,c3,c4) {uint8_t r = (c1>=0?READ(c1):0) && (c2>=0?READ(c2):0) && (c3>=0?READ(c3):0) && (c4>=0?READ(c4):0);\
+#define UI_KEYS_MATRIX(r1,r2,r3,r4,c1,c2,c3,c4) {uint8_t r = (c1>=0?READ(c1):1) && (c2>=0?READ(c2):1) && (c3>=0?READ(c3):1) && (c4>=0?READ(c4):1);\
     if(!r) {\
       r = 255;\
       if(r2>=0)WRITE(r2,HIGH);if(r3>=0)WRITE(r3,HIGH);if(r4>=0)WRITE(r4,HIGH);\
@@ -471,6 +471,14 @@ extern const int8_t encoder_table[16] PROGMEM ;
   UIMenuEntry name ## _4 PROGMEM ={0,0,0,0,0,row4};\
   const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
   const UIMenu name PROGMEM = {5,action,4,name ## _entries};
+#define UI_WIZARD5_T(name,action,row1,row2,row3,row4,row5) \
+UIMenuEntry name ## _1 PROGMEM ={0,0,0,0,0,row1};\
+UIMenuEntry name ## _2 PROGMEM ={0,0,0,0,0,row2};\
+UIMenuEntry name ## _3 PROGMEM ={0,0,0,0,0,row3};\
+UIMenuEntry name ## _4 PROGMEM ={0,0,0,0,0,row4};\
+UIMenuEntry name ## _5 PROGMEM ={0,0,0,0,0,row5};\
+const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4,&name ## _5};\
+const UIMenu name PROGMEM = {5,action,5,name ## _entries};
 #define UI_WIZARD2(name,action,row1,row2) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);\
   UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0,0};\
   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0,0};\
@@ -533,7 +541,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_STICKYMENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2+128,0,itemsCnt,name ## _entries};
 #define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries};
 
-#if FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS || FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD || FEATURE_CONTROLLER == CONTROLLER_BAM_DICE_DUE || (FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD && MOTHERBOARD != CONTROLLER_FELIX_DUE)
+#if FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS || FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD || FEATURE_CONTROLLER == CONTROLLER_BAM_DICE_DUE || (FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD && MOTHERBOARD != CONTROLLER_FELIX_DUE  && MOTHERBOARD != 101)
 #undef SDCARDDETECT
 #if MOTHERBOARD == 37
 #define SDCARDDETECT ORIG_SDCARDDETECT

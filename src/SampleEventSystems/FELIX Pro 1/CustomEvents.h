@@ -5,6 +5,10 @@ extern bool customMCode(GCode *com);
 extern void cExecute(int action,bool allowMoves);
 extern void cNextPrevious(int action,bool allowMoves,int increment);
 extern void cOkWizard(int action);
+extern bool cExecuteOverride(int action,bool allowMoves);
+extern void cRelaxExtruderEndstop();
+extern bool cRefreshPage();
+extern bool cCustomParser(char c1, char c2);
 
 #undef EVENT_TIMER_100MS
 #undef EVENT_TIMER_500MS
@@ -13,15 +17,22 @@ extern void cOkWizard(int action);
 #undef EVENT_UI_EXECUTE
 #undef EVENT_UI_NEXTPREVIOUS
 #undef EVENT_UI_OK_WIZARD
+#undef EVENT_UI_OVERRIDE_EXECUTE
+#undef EVENT_BEFORE_Z_HOME
+#undef EVENT_UI_REFRESH_PAGE
+#undef EVENT_CUSTOM_TEXT_PARSER
 
 #define EVENT_TIMER_100MS {Felix100MS();}
 #define EVENT_TIMER_500MS {Felix500MS();}
 #define EVENT_CONTRAIN_DESTINATION_COORDINATES FelixContainCoordinates();
 #define EVENT_UNHANDLED_M_CODE(c) customMCode(c)
 #define EVENT_UI_EXECUTE(action,allowMoves) cExecute(action,allowMoves)
+#define EVENT_UI_OVERRIDE_EXECUTE(action,allowMoves) cExecuteOverride(action,allowMoves)
 #define EVENT_UI_NEXTPREVIOUS(action,allowMoves,increment) cNextPrevious(action,allowMoves,increment)
 #define EVENT_UI_OK_WIZARD(action)  cOkWizard(action)
-
+#define EVENT_BEFORE_Z_HOME cRelaxExtruderEndstop()
+#define EVENT_UI_REFRESH_PAGE cRefreshPage()
+#define EVENT_CUSTOM_TEXT_PARSER(c1,c2) cCustomParser(c1,c2)
 // New menu actions
 
 #define UI_ACTION_XY1_BACK     1500
@@ -69,6 +80,32 @@ extern void cOkWizard(int action);
 #define UI_ACTION_FC_WAITHEAT   1541
 #define UI_ACTION_FC_BACK1      1542
 #define UI_ACTION_FC_BACK2      1543
+#define UI_ACTION_HALFAUTO_LEV  1544
+#define UI_ACTION_HALFAUTO_LEV2 1545
+#define UI_ACTION_HALFAUTO_LEV3 1546
+#define UI_ACTION_CZREFH        1547
+#define UI_ACTION_START_CZREFH  1548
+#define UI_ACTION_CZREFH_INFO   1549
+#define UI_ACTION_CZREFH_SUCC   1550
 
+#ifndef HALF_P1_X
+#define HALF_P1_X 25
+#define HALF_P1_Y 40
+#define HALF_P2_X 25
+#define HALF_P2_Y 170
+#define HALF_FIX_X 132
+#define HALF_FIX_Y 110
+#define HALF_Z 1.6 
+// Wheel position
+#define HALF_WHEEL_P1 -71
+#define HALF_WHEEL_P2 199
+#endif
+#ifndef HALF_PITCH
+#define HALF_PITCH 0.7
+#endif
+
+#ifndef ZPROBE_REF_HEIGHT
+#define ZPROBE_REF_HEIGHT 0.4
+#endif
 
 
