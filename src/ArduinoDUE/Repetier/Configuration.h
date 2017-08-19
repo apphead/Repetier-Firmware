@@ -70,7 +70,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 
 #define MOTHERBOARD 402
 //#define RFSERIAL SerialUSB
-#define SERIAL_PORT -1
+//#define SERIAL_PORT 1
 #include "pins.h"
 
 // Override pin definitions from pins.h
@@ -115,7 +115,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
   some speed, so alternatively you can activate the FAST_COREXYZ by uncommenting
   the define. This solves the core movements as nonlinear movements like done for
   deltas but without the complicated transformations. Since transformations are still
-  linear you can reduce delta computations per second to 10 and also use 10 
+  linear you can reduce delta computations per second to 10 and also use 10
   subsegments instead of 20 to reduce memory usage.
 */
 //#define FAST_COREXYZ
@@ -740,9 +740,9 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 
 //How many milliseconds a hot end will preheat before starting to check the
 //temperature. This value should NOT be set to the time it takes the
-//hot end to reach the target temperature, but should be set to the time it 
+//hot end to reach the target temperature, but should be set to the time it
 //takes to reach the minimum temperature your thermistor can read. The lower
-//the better/safer, and shouldn't need to be more than 30 seconds (30000) 
+//the better/safer, and shouldn't need to be more than 30 seconds (30000)
 #define MILLISECONDS_PREHEAT_TIME 15000
 
 // ##########################################################################################
@@ -1063,7 +1063,7 @@ Mega. Used only for nonlinear systems like delta or tuga. */
  * first a z home to get some reference, then raise to ZHOME_HEAT_HEIGHT do xy homing and then after
  * heating to minimum ZHOME_MIN_TEMPERATURE will z home again for correct height.
  * */
-#define HOMING_ORDER HOME_ORDER_XYZ
+#define HOMING_ORDER HOME_ORDER_XYTZ //Claude: zwingend XYTZ wählen, sonst funktioniert BLTouch nicht!
 /*
   Raise Z befor ehoming z axis
   0 = no
@@ -1071,7 +1071,7 @@ Mega. Used only for nonlinear systems like delta or tuga. */
   2 = always
   This is for printers with z probe used as z min. For homing the probe must be
   at a minimum height for some endstop types, so raising it before will help
-  to make sure this is guaranteed. 
+  to make sure this is guaranteed.
 */
 #define ZHOME_PRE_RAISE 2
 // Distance in mm to raise if required
@@ -1436,7 +1436,7 @@ to recalibrate z.
 /** Delay before going down. Needed for piezo endstops to reload safely. */
 #define Z_PROBE_DELAY 0
 #define Z_PROBE_XY_SPEED 150
-#define Z_PROBE_SWITCHING_DISTANCE 1 // Distance to safely switch off probe after it was activated
+#define Z_PROBE_SWITCHING_DISTANCE 10 // Distance to safely switch off probe after it was activated
 #define Z_PROBE_REPETITIONS 1 // Repetitions for probing at one point.
 /** The height is the difference between activated probe position and nozzle height. */
 #define Z_PROBE_HEIGHT 0.78
@@ -1571,7 +1571,7 @@ Always hard to say since the other angle is 89° in this case!
 /* Babystepping allows to change z height during print without changing official z height */
 #define FEATURE_BABYSTEPPING 1
 /* If you have a threaded rod, you want a higher multiplicator to see an effect. Limit value to 50 or you get easily overflows.*/
-#define BABYSTEP_MULTIPLICATOR 1
+#define BABYSTEP_MULTIPLICATOR 5
 
 /* Define a pin to tuen light on/off */
 #define CASE_LIGHTS_PIN -1
@@ -1638,7 +1638,7 @@ it can be set here */
  it lets the move buffer run empty so closing the door allows continuing the print.
  The exact behavior might change in the future.
   */
- 
+
 #define DOOR_PIN -1
 #define DOOR_PULLUP 1
 #define DOOR_INVERTING 1
