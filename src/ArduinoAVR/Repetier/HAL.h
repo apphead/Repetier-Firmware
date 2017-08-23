@@ -26,20 +26,24 @@
 
 /**
   This is the main Hardware Abstraction Layer (HAL).
-  To make the firmware work with different processors and toolchains,
+  To make the firmware work with different processors and tool chains,
   all hardware related code should be packed into the hal files.
 */
 
 #include <avr/pgmspace.h>
 #include <avr/io.h>
-#if CPU_ARCH==ARCH_AVR
+
+
+#define INLINE __attribute__((always_inline))
+
+#if CPU_ARCH == ARCH_AVR
 #include <avr/io.h>
 #else
 #define PROGMEM
 #define PGM_P const char *
 #define PSTR(s) s
-#define pgm_read_byte_near(x) (*(char*)x)
-#define pgm_read_byte(x) (*(char*)x)
+#define pgm_read_byte_near(x) (*(uint8_t*)x)
+#define pgm_read_byte(x) (*(uint8_t*)x)
 #endif
 
 #define PACK
@@ -52,21 +56,29 @@
 #include <avr/wdt.h>
 /** \brief Prescale factor, timer0 runs at.
 
-All known arduino boards use 64. This value is needed for the extruder timing. */
+All known Arduino boards use 64. This value is needed for the extruder timing. */
 #define TIMER0_PRESCALE 64
 
 #define ANALOG_PRESCALER _BV(ADPS0)|_BV(ADPS1)|_BV(ADPS2)
 
-#if MOTHERBOARD==8 || MOTHERBOARD==9 || CPU_ARCH!=ARCH_AVR
+#if MOTHERBOARD==8 || MOTHERBOARD==88 || MOTHERBOARD==9 || MOTHERBOARD==92 || CPU_ARCH!=ARCH_AVR
 #define EXTERNALSERIAL
 #endif
-//#define EXTERNALSERIAL  // Force using arduino serial
+#if NEW_COMMUNICATION && defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
+#undef EXTERNALSERIAL
+#define EXTERNALSERIAL
+#endif
+
+//#define EXTERNALSERIAL  // Force using Arduino serial
 #ifndef EXTERNALSERIAL
+#undef HardwareSerial_h
 #define  HardwareSerial_h // Don't use standard serial console
 #endif
 #include <inttypes.h>
-#include "Print.h"
-
+#include "Stream.h"
+#ifdef EXTERNALSERIAL
+#define SERIAL_RX_BUFFER_SIZE 128
+#endif
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
 #else
@@ -81,13 +93,45 @@ All known arduino boards use 64. This value is needed for the extruder timing. *
 #define	SET_INPUT(IO)  pinMode(IO, INPUT)
 #define	SET_OUTPUT(IO)  pinMode(IO, OUTPUT)
 #endif
+#ifndef cbi
+#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
+#endif
+#ifndef sbi
+#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
+#endif
 
-#define BEGIN_INTERRUPT_PROTECTED {uint8_t sreg=SREG;__asm volatile( "cli" ::: "memory" );
-#define END_INTERRUPT_PROTECTED SREG=sreg;}
-#define ESCAPE_INTERRUPT_PROTECTED SREG=sreg;
+class InterruptProtectedBlock
+{
+    uint8_t sreg;
+public:
+    inline void protect()
+    {
+        cli();
+    }
+
+    inline void unprotect()
+    {
+        SREG = sreg;
+    }
+
+    inline InterruptProtectedBlock(bool later = false)
+    {
+        sreg = SREG;
+        if(!later)
+            cli();
+    }
+
+    inline ~InterruptProtectedBlock()
+    {
+        SREG = sreg;
+    }
+};
 
 #define EEPROM_OFFSET               0
 #define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
+#define ANALOG_INPUT_SAMPLE 5
+// Bits of the ADC converter
+#define ANALOG_INPUT_BITS 10
 #define ANALOG_REDUCE_BITS 0
 #define ANALOG_REDUCE_FACTOR 1
 
@@ -101,10 +145,20 @@ All known arduino boards use 64. This value is needed for the extruder timing. *
 /** defines the data direction (writing to I2C device) in i2cStart(),i2cRepStart() */
 #define I2C_WRITE   0
 
+#if NONLINEAR_SYSTEM
+// Maximum speed with 100% interrupt utilization is 27000 Hz at 16MHz cpu
+// leave some margin for all the extra transformations. So we keep inside clean timings.
+#define LIMIT_INTERVAL ((F_CPU/30000)+1)
+#else
+#define LIMIT_INTERVAL ((F_CPU/40000)+1)
+#endif
 
-typedef unsigned int speed_t;
-typedef unsigned long ticks_t;
-typedef unsigned long millis_t;
+typedef uint16_t speed_t;
+typedef uint32_t ticks_t;
+typedef uint32_t millis_t;
+typedef uint8_t flag8_t;
+typedef int8_t fast8_t;
+typedef uint8_t ufast8_t;
 
 #define FAST_INTEGER_SQRT
 
@@ -135,23 +189,30 @@ typedef unsigned long millis_t;
 
 #define SERIAL_BUFFER_SIZE 128
 #define SERIAL_BUFFER_MASK 127
-#define SERIAL_TX_BUFFER_SIZE 64
-#define SERIAL_TX_BUFFER_MASK 63
+#undef SERIAL_TX_BUFFER_SIZE
+#undef SERIAL_TX_BUFFER_MASK
+#ifdef BIG_OUTPUT_BUFFER
+  #define SERIAL_TX_BUFFER_SIZE 128
+  #define SERIAL_TX_BUFFER_MASK 127
+#else
+  #define SERIAL_TX_BUFFER_SIZE 64
+  #define SERIAL_TX_BUFFER_MASK 63
+#endif
 
 struct ring_buffer
 {
-    unsigned char buffer[SERIAL_BUFFER_SIZE];
+    uint8_t buffer[SERIAL_BUFFER_SIZE];
     volatile uint8_t head;
     volatile uint8_t tail;
 };
 struct ring_buffer_tx
 {
-    unsigned char buffer[SERIAL_TX_BUFFER_SIZE];
+    uint8_t buffer[SERIAL_TX_BUFFER_SIZE];
     volatile uint8_t head;
     volatile uint8_t tail;
 };
 
-class RFHardwareSerial : public Print
+class RFHardwareSerial : public Stream
 {
 public:
     ring_buffer *_rx_buffer;
@@ -193,40 +254,41 @@ extern RFHardwareSerial RFSerial;
 #define WAIT_OUT_EMPTY while(tx_buffer.head != tx_buffer.tail) {}
 #else
 #define RFSERIAL Serial
+#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
+#if BLUETOOTH_SERIAL == 1
+#define RFSERIAL2 Serial1
+#elif BLUETOOTH_SERIAL == 2
+#define RFSERIAL2 Serial2
+#elif BLUETOOTH_SERIAL == 3
+#define RFSERIAL2 Serial3
+#elif BLUETOOTH_SERIAL == 4
+#define RFSERIAL2 Serial4
+#elif BLUETOOTH_SERIAL == 5
+#define RFSERIAL2 Serial5
 #endif
-
-#define OUT_P_I(p,i) Com::printF(PSTR(p),(int)(i))
-#define OUT_P_I_LN(p,i) Com::printFLN(PSTR(p),(int)(i))
-#define OUT_P_L(p,i) Com::printF(PSTR(p),(long)(i))
-#define OUT_P_L_LN(p,i) Com::printFLN(PSTR(p),(long)(i))
-#define OUT_P_F(p,i) Com::printF(PSTR(p),(float)(i))
-#define OUT_P_F_LN(p,i) Com::printFLN(PSTR(p),(float)(i))
-#define OUT_P_FX(p,i,x) Com::printF(PSTR(p),(float)(i),x)
-#define OUT_P_FX_LN(p,i,x) Com::printFLN(PSTR(p),(float)(i),x)
-#define OUT_P(p) Com::printF(PSTR(p))
-#define OUT_P_LN(p) Com::printFLN(PSTR(p))
-#define OUT_ERROR_P(p) Com::printErrorF(PSTR(p))
-#define OUT_ERROR_P_LN(p) {Com::printErrorF(PSTR(p));Com::println();}
-#define OUT(v) Com::print(v)
-#define OUT_LN Com::println()
+#endif
+#endif
 
 class HAL
 {
 public:
+#if FEATURE_WATCHDOG
+    static bool wdPinged;
+#endif
     HAL();
     virtual ~HAL();
     static inline void hwSetup(void)
     {}
-    // return val'val
-    static uint16_t integerSqrt(long a);
+    // return val*val
+    static uint16_t integerSqrt(uint32_t a);
     /** \brief Optimized division
 
     Normally the C compiler will compute a long/long division, which takes ~670 Ticks.
-    This version is optimized for a 16 bit dividend and recognises the special cases
-    of a 24 bit and 16 bit dividend, which offen, but not always occur in updating the
+    This version is optimized for a 16 bit dividend and recognizes the special cases
+    of a 24 bit and 16 bit dividend, which often, but not always occur in updating the
     interval.
     */
-    static inline long Div4U2U(unsigned long a,unsigned int b)
+    static inline int32_t Div4U2U(uint32_t a,uint16_t b)
     {
 #if CPU_ARCH==ARCH_AVR
         // r14/r15 remainder
@@ -376,13 +438,13 @@ public:
         // unsigned int v = ((timer>>8)*cur->accel)>>10;
         return res;
 #else
-        return ((timer>>8)*accel)>>10;
+        return ((timer >> 8) * accel) >> 10;
 #endif
     }
 // Multiply two 16 bit values and return 32 bit result
-    static inline unsigned long mulu16xu16to32(unsigned int a,unsigned int b)
+    static inline uint32_t mulu16xu16to32(unsigned int a,unsigned int b)
     {
-        unsigned long res;
+        uint32_t res;
         // 18 Ticks = 1.125 us
         __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free
             // Result LSB first: %A0, %B0, %A1
@@ -409,7 +471,7 @@ public:
 // Multiply two 16 bit values and return 32 bit result
     static inline unsigned int mulu6xu16shift16(unsigned int a,unsigned int b)
     {
-#if CPU_ARCH==ARCH_AVR
+#if CPU_ARCH == ARCH_AVR
         unsigned int res;
         // 18 Ticks = 1.125 us
         __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free
@@ -433,7 +495,7 @@ public:
             :"r18","r19" );
         return res;
 #else
-        return ((long)a*b)>>16;
+        return ((int32_t)a * b) >> 16;
 #endif
     }
     static inline void digitalWrite(uint8_t pin,uint8_t value)
@@ -448,7 +510,7 @@ public:
     {
         ::pinMode(pin,mode);
     }
-    static long CPUDivU2(unsigned int divisor);
+    static int32_t CPUDivU2(unsigned int divisor);
     static inline void delayMicroseconds(unsigned int delayUs)
     {
         ::delayMicroseconds(delayUs);
@@ -467,47 +529,55 @@ public:
     }
     static inline void eprSetByte(unsigned int pos,uint8_t value)
     {
-        eeprom_write_byte((unsigned char *)(EEPROM_OFFSET+pos), value);
+        eeprom_write_byte((unsigned char *)(EEPROM_OFFSET + pos), value);
     }
     static inline void eprSetInt16(unsigned int pos,int16_t value)
     {
-        eeprom_write_word((unsigned int*)(EEPROM_OFFSET+pos),value);
+        eeprom_write_word((unsigned int*)(EEPROM_OFFSET + pos),value);
     }
     static inline void eprSetInt32(unsigned int pos,int32_t value)
     {
-        eeprom_write_dword((uint32_t*)(EEPROM_OFFSET+pos),value);
+        eeprom_write_dword((uint32_t*)(EEPROM_OFFSET + pos),value);
     }
     static inline void eprSetFloat(unsigned int pos,float value)
     {
-        eeprom_write_block(&value,(void*)(EEPROM_OFFSET+pos), 4);
+        eeprom_write_block(&value,(void*)(EEPROM_OFFSET + pos), 4);
     }
     static inline uint8_t eprGetByte(unsigned int pos)
     {
-        return eeprom_read_byte ((unsigned char *)(EEPROM_OFFSET+pos));
+        return eeprom_read_byte ((unsigned char *)(EEPROM_OFFSET + pos));
     }
     static inline int16_t eprGetInt16(unsigned int pos)
     {
-        return eeprom_read_word((uint16_t *)(EEPROM_OFFSET+pos));
+        return eeprom_read_word((uint16_t *)(EEPROM_OFFSET + pos));
     }
     static inline int32_t eprGetInt32(unsigned int pos)
     {
-        return eeprom_read_dword((uint32_t*)(EEPROM_OFFSET+pos));
+        return eeprom_read_dword((uint32_t*)(EEPROM_OFFSET + pos));
     }
     static inline float eprGetFloat(unsigned int pos)
     {
         float v;
-        eeprom_read_block(&v,(void *)(EEPROM_OFFSET+pos),4); // newer gcc have eeprom_read_block but not arduino 22
+        eeprom_read_block(&v,(void *)(EEPROM_OFFSET + pos),4); // newer gcc have eeprom_read_block but not arduino 22
         return v;
     }
+
+    // Faster version of InterruptProtectedBlock.
+    // For safety it ma yonly be called from within an
+    // interrupt handler.
     static inline void allowInterrupts()
     {
         sei();
     }
+
+    // Faster version of InterruptProtectedBlock.
+    // For safety it may only be called from within an
+    // interrupt handler.
     static inline void forbidInterrupts()
     {
         cli();
     }
-    static inline unsigned long timeInMilliseconds()
+    static inline millis_t timeInMilliseconds()
     {
         return millis();
     }
@@ -515,13 +585,17 @@ public:
     {
         return pgm_read_byte(ptr);
     }
+    static inline int16_t readFlashWord(PGM_P ptr)
+    {
+        return pgm_read_word(ptr);
+    }
     static inline void serialSetBaudrate(long baud)
     {
         RFSERIAL.begin(baud);
     }
     static inline bool serialByteAvailable()
     {
-        return RFSERIAL.available()>0;
+        return RFSERIAL.available() > 0;
     }
     static inline uint8_t serialReadByte()
     {
@@ -543,6 +617,7 @@ public:
     // SPI related functions
     static void spiBegin()
     {
+#if SDSS >= 0
         SET_INPUT(MISO_PIN);
         SET_OUTPUT(MOSI_PIN);
         SET_OUTPUT(SCK_PIN);
@@ -552,13 +627,16 @@ public:
         SET_OUTPUT(SDSSORIG);
 #endif
         // set SS high - may be chip select for another SPI device
-#if SET_SPI_SS_HIGH
+#if defined(SET_SPI_SS_HIGH) && SET_SPI_SS_HIGH
         WRITE(SDSS, HIGH);
 #endif  // SET_SPI_SS_HIGH
+#endif
     }
     static inline void spiInit(uint8_t spiRate)
     {
-        spiRate = spiRate > 12 ? 6 : spiRate/2;
+         uint8_t r = 0;
+         for (uint8_t b = 2; spiRate > b && r < 6; b <<= 1, r++);
+
         SET_OUTPUT(SS);
         WRITE(SS,HIGH);
         SET_OUTPUT(SCK);
@@ -570,14 +648,14 @@ public:
         PRR0 &= ~(1<<PRSPI);
 #endif
         // See avr processor documentation
-        SPCR = (1 << SPE) | (1 << MSTR) | (spiRate >> 1);
-        SPSR = spiRate & 1 || spiRate == 6 ? 0 : 1 << SPI2X;
+        SPCR = (1 << SPE) | (1 << MSTR) | (r >> 1);
+        SPSR = (r & 1 || r == 6 ? 0 : 1) << SPI2X;
 
     }
     static inline uint8_t spiReceive(uint8_t send=0xff)
     {
         SPDR = send;
-        while (!(SPSR & (1 << SPIF)));
+        while (!(SPSR & (1 << SPIF))) {}
         return SPDR;
     }
     static inline void spiReadBlock(uint8_t*buf,size_t nbyte)
@@ -586,17 +664,17 @@ public:
         SPDR = 0XFF;
         for (size_t i = 0; i < nbyte; i++)
         {
-            while (!(SPSR & (1 << SPIF)));
+            while (!(SPSR & (1 << SPIF))) {}
             buf[i] = SPDR;
             SPDR = 0XFF;
         }
-        while (!(SPSR & (1 << SPIF)));
+        while (!(SPSR & (1 << SPIF))) {}
         buf[nbyte] = SPDR;
     }
     static inline void spiSend(uint8_t b)
     {
         SPDR = b;
-        while (!(SPSR & (1 << SPIF)));
+        while (!(SPSR & (1 << SPIF))) {}
     }
     static inline void spiSend(const uint8_t* buf , size_t n)
     {
@@ -608,13 +686,13 @@ public:
             size_t i = 2;
             while (1)
             {
-                while (!(SPSR & (1 << SPIF)));
+                while (!(SPSR & (1 << SPIF))) {}
                 SPDR = b;
                 if (i == n) break;
                 b = buf[i++];
             }
         }
-        while (!(SPSR & (1 << SPIF)));
+        while (!(SPSR & (1 << SPIF))) {}
     }
 
     static inline __attribute__((always_inline))
@@ -623,29 +701,35 @@ public:
         SPDR = token;
         for (uint16_t i = 0; i < 512; i += 2)
         {
-            while (!(SPSR & (1 << SPIF)));
+            while (!(SPSR & (1 << SPIF))) {}
             SPDR = buf[i];
-            while (!(SPSR & (1 << SPIF)));
+            while (!(SPSR & (1 << SPIF))) {}
             SPDR = buf[i + 1];
         }
-        while (!(SPSR & (1 << SPIF)));
+        while (!(SPSR & (1 << SPIF))) {}
     }
 
     // I2C Support
 
-    static void i2cInit(unsigned long clockSpeedHz);
-    static unsigned char i2cStart(unsigned char address);
-    static void i2cStartWait(unsigned char address);
+	static void i2cSetClockspeed(uint32_t clockSpeedHz);
+    static void i2cInit(uint32_t clockSpeedHz);
+    static unsigned char i2cStart(uint8_t address);
+    static void i2cStartWait(uint8_t address);
     static void i2cStop(void);
-    static unsigned char i2cWrite( unsigned char data );
-    static unsigned char i2cReadAck(void);
-    static unsigned char i2cReadNak(void);
+    static void i2cWrite( uint8_t data );
+    static uint8_t i2cReadAck(void);
+    static uint8_t i2cReadNak(void);
 
     // Watchdog support
 
     inline static void startWatchdog()
     {
-        wdt_enable(WDTO_1S);
+#if defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)
+        WDTCSR = (1<<WDCE) | (1<<WDE);								// wdt FIX for arduino mega boards
+        WDTCSR = (1<<WDIE) | (1<<WDP3);
+#else
+        wdt_enable(WDTO_4S);
+#endif
     };
     inline static void stopWatchdog()
     {
@@ -653,7 +737,9 @@ public:
     }
     inline static void pingWatchdog()
     {
-        wdt_reset();
+#if FEATURE_WATCHDOG
+      wdPinged = true;
+#endif
     };
     inline static float maxExtruderTimerFrequency()
     {
@@ -661,9 +747,12 @@ public:
     }
 #if FEATURE_SERVO
     static unsigned int servoTimings[4];
-    static void servoMicroseconds(uint8_t servo,int ms);
+    static void servoMicroseconds(uint8_t servo,int ms, uint16_t autoOff);
 #endif
     static void analogStart();
+#if USE_ADVANCE
+    static void resetExtruderDirection();
+#endif
 protected:
 private:
 };

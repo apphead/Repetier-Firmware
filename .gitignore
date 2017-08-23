@@ -7,7 +7,9 @@ Private/**
 Private/*
 
 *.hex
-src/ArduinoAVR/Repetier/bin/*
+src/ArduinoAVR/Repetier/Repetier/*
+src/ArduinoAVR/Repetier/Repetier/*
+src/ArduinoAVR/Repetier/bin/*                                
 src/ArduinoAVR/Repetier/bin/Release/Repetier_mega2560_.elf
 
 src/ArduinoAVR/Repetier/bin/Release/Repetier_mega2560_.elf.hex
@@ -22,3 +24,17 @@ src/ArduinoAVR/Configuration_ordbot.h
 
 src/ArduinoAVR/Configuration_delta.h
 Configuration_*.h
+Repetier.depend
+Repetier.layout
+activate*.bat
+src/Repetier-Atmel7/*
+src/ArduinoDUE/Repetier.zip
+src/ArduinoAVR/Repetier.zip
+.clang_complete
+.gcc-flags.json
+.pioenvs/.sconsign.dblite
+.pioenvs/structure.hash
+.pioenvs
+.piolibdeps
+.travis.yml
+lib/readme.txt
