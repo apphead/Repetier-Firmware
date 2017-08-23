@@ -123,7 +123,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 /* You can write some GCODE to be executed on startup. Use this e.g. to set some
 pins. Separate multiple GCODEs with \n
 */
-#define STARTUP_GCODE "M340 P0 S2200 ; "
+#define STARTUP_GCODE "M340 P0 S2200"
 
 // ##########################################################################################
 // ##                               Calibration                                            ##
@@ -889,10 +889,10 @@ on this endstop.
 // If during homing the endstop is reached, ho many mm should the printer move back for the second try
 #define ENDSTOP_X_BACK_MOVE 5
 #define ENDSTOP_Y_BACK_MOVE 5
-#define ENDSTOP_Z_BACK_MOVE 2
+#define ENDSTOP_Z_BACK_MOVE 5
 // If you do z min homing, you might want to rise extruder a bit after homing so it does not heat
 // touching your bed.
-#define Z_UP_AFTER_HOME 0
+#define Z_UP_AFTER_HOME 10
 
 // For higher precision you can reduce the speed for the second test on the endstop
 // during homing operation. The homing speed is divided by the value. 1 = same speed, 2 = half speed
@@ -915,7 +915,7 @@ on this endstop.
 // For delta robot Z_MAX_LENGTH is the maximum travel of the towers and should be set to the distance between the hotend
 // and the platform when the printer is at its home position.
 // If EEPROM is enabled these values will be overridden with the values in the EEPROM
-#define X_MAX_LENGTH 243
+#define X_MAX_LENGTH 240
 #define Y_MAX_LENGTH 295
 #define Z_MAX_LENGTH 210
 
@@ -1050,11 +1050,11 @@ Mega. Used only for nonlinear systems like delta or tuga. */
     */
 #define MAX_FEEDRATE_X 500
 #define MAX_FEEDRATE_Y 500
-#define MAX_FEEDRATE_Z 10
+#define MAX_FEEDRATE_Z 50
 
 /** Home position speed in mm/s. Overridden if EEPROM activated. */
-#define HOMING_FEEDRATE_X 100
-#define HOMING_FEEDRATE_Y 100
+#define HOMING_FEEDRATE_X 80
+#define HOMING_FEEDRATE_Y 80
 #define HOMING_FEEDRATE_Z 5
 
 /** Set order of axis homing. Use HOME_ORDER_XYZ and replace XYZ with your order.
@@ -1278,7 +1278,7 @@ the power will be turned on without the need to call M80 if initially started.
 If you use an ATX power supply you need the power pin to work non inverting. For some special
 boards you might need to make it inverting.
 */
-#define POWER_INVERTING 1
+#define POWER_INVERTING 0
 /** What shall the printer do, when it receives an M112 emergency stop signal?
  0 = Disable heaters/motors, wait forever until someone presses reset.
  1 = restart by resetting the AVR controller. The USB connection will not reset if managed by a different chip!
@@ -1426,20 +1426,20 @@ to recalibrate z.
 #define Z_PROBE_ON_HIGH 0
 #define Z_PROBE_X_OFFSET -46
 #define Z_PROBE_Y_OFFSET 10
-#define Z_PROBE_BED_DISTANCE 12.0 // Higher than max bed level distance error in mm
+#define Z_PROBE_BED_DISTANCE 8.0 // Higher than max bed level distance error in mm
 
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
 #define Z_PROBE_WAIT_BEFORE_TEST 0
 /** Speed of z-axis in mm/s when probing */
-#define Z_PROBE_SPEED 2
+#define Z_PROBE_SPEED 5
 /** Delay before going down. Needed for piezo endstops to reload safely. */
 #define Z_PROBE_DELAY 0
 #define Z_PROBE_XY_SPEED 150
-#define Z_PROBE_SWITCHING_DISTANCE 15 // Distance to safely switch off probe after it was activated
-#define Z_PROBE_REPETITIONS 1 // Repetitions for probing at one point.
+#define Z_PROBE_SWITCHING_DISTANCE 20 // Distance to safely switch off probe after it was activated
+#define Z_PROBE_REPETITIONS 2 // Repetitions for probing at one point.
 /** The height is the difference between activated probe position and nozzle height. */
-#define Z_PROBE_HEIGHT 0.78
+#define Z_PROBE_HEIGHT 2.83
 /** These scripts are run before resp. after the z-probe is done. Add here code to activate/deactivate probe if needed. */
 #define Z_PROBE_START_SCRIPT "M340 P0 S700 ;"
 #define Z_PROBE_FINISHED_SCRIPT "M340 P0 S1500 ;"
@@ -1495,7 +1495,7 @@ motorized bed leveling */
 #define FEATURE_AUTOLEVEL true
 #define Z_PROBE_X1 20.0
 #define Z_PROBE_Y1 20.0
-#define Z_PROBE_X2 190.0
+#define Z_PROBE_X2 180.0
 #define Z_PROBE_Y2 20.0
 #define Z_PROBE_X3 20.0
 #define Z_PROBE_Y3 290.0
