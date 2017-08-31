@@ -46,7 +46,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // BASIC SETTINGS: select your board type, thermistor type, axis scaling, and endstop configuration
 
 /** Number of extruders. Maximum 6 extruders. */
-#define NUM_EXTRUDER 2
+#define NUM_EXTRUDER 1
 
 /** Set to 1 if all extruder motors go to 1 nozzle that mixes your colors. */
 #define MIXING_EXTRUDER 0
@@ -74,7 +74,6 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 #include "pins.h"
 
 // Override pin definitions from pins.h
-//#define FAN_PIN   4  // Extruder 2 uses the default fan output, so move to an other pin
 //#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
 
 
@@ -208,7 +207,7 @@ Overridden if EEPROM activated.*/
 #define KILL_IF_SENSOR_DEFECT 0
 
 // for each extruder, fan will stay on until extruder temperature is below this value
-#define EXTRUDER_FAN_COOL_TEMP 50
+#define EXTRUDER_FAN_COOL_TEMP 45
 // Retraction for sd pause over lcd
 #define RETRACT_ON_PAUSE 2
 // These commands get executed after storing position and going to park position.
@@ -1036,14 +1035,14 @@ Mega. Used only for nonlinear systems like delta or tuga. */
     This helps cooling the Stepper motors between two print jobs.
     Overridden if EEPROM activated.
 */
-#define STEPPER_INACTIVE_TIME 360
+#define STEPPER_INACTIVE_TIME 0
 /** After x seconds of inactivity, the system will go down as far it can.
     It will at least disable all stepper motors and heaters. If the board has
     a power pin, it will be disabled, too.
     Set value to 0 for disabled.
     Overridden if EEPROM activated.
 */
-#define MAX_INACTIVE_TIME 0L
+#define MAX_INACTIVE_TIME 0
 /** Maximum feedrate, the system allows. Higher feedrates are reduced to these values.
     The axis order in all axis related arrays is X, Y, Z
      Overridden if EEPROM activated.
@@ -1075,7 +1074,7 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 */
 #define ZHOME_PRE_RAISE 2
 // Distance in mm to raise if required
-#define ZHOME_PRE_RAISE_DISTANCE 10
+#define ZHOME_PRE_RAISE_DISTANCE 5
 
 /*
  Raises Z before swapping extruder (tool change) and lowers it afterwards
@@ -1426,17 +1425,17 @@ to recalibrate z.
 #define Z_PROBE_ON_HIGH 0
 #define Z_PROBE_X_OFFSET -46
 #define Z_PROBE_Y_OFFSET 10
-#define Z_PROBE_BED_DISTANCE 8.0 // Higher than max bed level distance error in mm
+#define Z_PROBE_BED_DISTANCE 5.0 // Higher than max bed level distance error in mm
 
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
 #define Z_PROBE_WAIT_BEFORE_TEST 0
 /** Speed of z-axis in mm/s when probing */
-#define Z_PROBE_SPEED 5
+#define Z_PROBE_SPEED 4
 /** Delay before going down. Needed for piezo endstops to reload safely. */
 #define Z_PROBE_DELAY 0
 #define Z_PROBE_XY_SPEED 150
-#define Z_PROBE_SWITCHING_DISTANCE 20 // Distance to safely switch off probe after it was activated
+#define Z_PROBE_SWITCHING_DISTANCE 12 // Distance to safely switch off probe after it was activated
 #define Z_PROBE_REPETITIONS 2 // Repetitions for probing at one point.
 /** The height is the difference between activated probe position and nozzle height. */
 #define Z_PROBE_HEIGHT 2.83
@@ -1605,11 +1604,12 @@ Separate commands by \n */
 /** Should support for fan control be compiled in. If you enable this make sure
 the FAN pin is not the same as for your second extruder. RAMPS e.g. has FAN_PIN in 9 which
 is also used for the heater if you have 2 extruders connected. */
-#define FEATURE_FAN_CONTROL 1
+#define FEATURE_FAN_CONTROL true //Claude: must be true for heatsink fan, see FAN_PIN
+                                  //Claude: set starting temp with EXTRUDER_FAN_COOL_TEMP
 
 /* You can have a second fan controlled by adding P1 to M106/M107 command. */
-#define FEATURE_FAN2_CONTROL 1
-//#define FAN2_PIN ORIG_FAN2_PIN
+#define FEATURE_FAN2_CONTROL true //Claude: must be true for print cooling fan, see FAN2_PIN
+                                  //Claude: controlled by slicer
 
 /* By setting FAN_BOARD_PIN to a pin number you get a board cooler. That fan
 goes on as soon as moves occur. Mainly to prevent overheating of stepper drivers. */
