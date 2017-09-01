@@ -85,13 +85,8 @@ gets used, or you will get problems with checksums etc.
 - 100 is programming port on due
 - 101 is native port on due. Us eit to support both ports at the same time!
 */
-#define BLUETOOTH_SERIAL   -1                      // Port number (1..3) - For RADDS use 1
-#define BLUETOOTH_BAUD     115200                 // communication speed
-
-
-// Uncomment the following line if you are using Arduino compatible firmware made for Arduino version earlier then 1.0
-// If it is incompatible you will get compiler errors about write functions not being compatible!
-//#define COMPAT_PRE1
+#define BLUETOOTH_SERIAL   1                      // Port number (1..3) - For RADDS use 1
+#define BLUETOOTH_BAUD     250000                 // communication speed
 
 /* Define the type of axis movements needed for your printer. The typical case
 is a full cartesian system where x, y and z moves are handled by separate motors.
@@ -253,7 +248,7 @@ controlled by settings in extruder 0 definition. */
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
 #define EXT0_TEMPSENSOR_PIN TEMP_0_PIN
 // Which pin enables the heater
-#define EXT0_HEATER_PIN HEATER_0_PIN
+#define EXT0_HEATER_PIN HEATER_2_PIN
 #define EXT0_STEP_PIN E0_STEP_PIN
 #define EXT0_DIR_PIN E0_DIR_PIN
 // set to false/true for normal / inverse direction
@@ -267,7 +262,7 @@ controlled by settings in extruder 0 definition. */
 #define EXT0_ENABLE2_PIN E0_ENABLE_PIN
 
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
-#define EXT0_ENABLE_ON 0
+#define EXT0_ENABLE_ON 1
 // The following speed settings are for skeinforge 40+ where e is the
 // length of filament pulled inside the heater. For repsnap or older
 // skeinforge use higher values.
@@ -342,9 +337,9 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT0_SELECT_COMMANDS "M117 Extruder 1"
 #define EXT0_DESELECT_COMMANDS ""
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the extruder on, the fan goes on. */
-#define EXT0_EXTRUDER_COOLER_PIN ORIG_FAN_PIN
+#define EXT0_EXTRUDER_COOLER_PIN ORIG_FAN2_PIN
 /** PWM speed for the cooler fan. 0=off 255=full speed */
-#define EXT0_EXTRUDER_COOLER_SPEED 255
+#define EXT0_EXTRUDER_COOLER_SPEED 120
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
 #define EXT0_DECOUPLE_TEST_PERIOD 12000
 /** Pin which toggles regualrly during extrusion allowing jam control. -1 = disabled */
@@ -382,14 +377,14 @@ The codes are only executed for multiple extruder when changing the extruder. */
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
 #define EXT1_TEMPSENSOR_PIN TEMP_2_PIN
 // Which pin enables the heater
-#define EXT1_HEATER_PIN HEATER_2_PIN
+#define EXT1_HEATER_PIN HEATER_3_PIN
 #define EXT1_STEP_PIN E1_STEP_PIN
 #define EXT1_DIR_PIN E1_DIR_PIN
 // set to false/true for normal/inverse direction
 #define EXT1_INVERSE false
 #define EXT1_ENABLE_PIN E1_ENABLE_PIN
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
-#define EXT1_ENABLE_ON false
+#define EXT1_ENABLE_ON 1
 /* Set to 1 to mirror motor. Pins for mirrored motor are below */
 #define EXT1_MIRROR_STEPPER 0
 #define EXT1_STEP2_PIN E0_STEP_PIN
@@ -461,9 +456,9 @@ cog. Direct drive extruder need 0. */
 #define EXT1_SELECT_COMMANDS "M117 Extruder 2"
 #define EXT1_DESELECT_COMMANDS ""
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the extruder on, the fan goes on. */
-#define EXT1_EXTRUDER_COOLER_PIN ORIG_FAN_PIN
+#define EXT1_EXTRUDER_COOLER_PIN ORIG_FAN2_PIN
 /** PWM speed for the cooler fan. 0=off 255=full speed */
-#define EXT1_EXTRUDER_COOLER_SPEED 255
+#define EXT1_EXTRUDER_COOLER_SPEED 120
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
 #define EXT1_DECOUPLE_TEST_PERIOD 12000
 /** Pin which toggles regularly during extrusion allowing jam control. -1 = disabled */
@@ -846,9 +841,9 @@ on this endstop.
 //// ADVANCED SETTINGS - to tweak parameters
 
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
-#define X_ENABLE_ON 0
-#define Y_ENABLE_ON 0
-#define Z_ENABLE_ON 0
+#define X_ENABLE_ON 1
+#define Y_ENABLE_ON 1
+#define Z_ENABLE_ON 1
 
 // Disables axis when it's not being used.
 #define DISABLE_X false
@@ -1578,17 +1573,17 @@ Always hard to say since the other angle is 89° in this case!
 
 /** Set to false to disable SD support: */
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
-#define SDSUPPORT 0
+#define SDSUPPORT 1
 // Uncomment to enable or change card detection pin. With card detection the card is mounted on insertion.
-#define SDCARDDETECT -1
+#define SDCARDDETECT 1
 // Change to true if you get a inserted message on removal.
 #define SDCARDDETECTINVERTED false
 #endif
 /** Show extended directory including file length. Don't use this with Pronterface! */
-#define SD_EXTENDED_DIR 1
+#define SD_EXTENDED_DIR 0
 /** The GCODEs in this line get executed, when you stop a SD print before it was ended.
 Separate commands by \n */
-#define SD_RUN_ON_STOP ""
+#define SD_RUN_ON_STOP "M401 ;"
 /** Disable motors and heaters when print was stopped. */
 #define SD_STOP_HEATER_AND_MOTORS_ON_STOP 1
 // If you want support for G2/G3 arc commands set to true, otherwise false.
@@ -1599,7 +1594,7 @@ Separate commands by \n */
 #define FEATURE_MEMORY_POSITION 1
 
 /** If a checksum is sent, all future commands must also contain a checksum. Increases reliability especially for binary protocol. */
-#define FEATURE_CHECKSUM_FORCED 0
+#define FEATURE_CHECKSUM_FORCED 1
 
 /** Should support for fan control be compiled in. If you enable this make sure
 the FAN pin is not the same as for your second extruder. RAMPS e.g. has FAN_PIN in 9 which
@@ -1614,12 +1609,12 @@ is also used for the heater if you have 2 extruders connected. */
 /* By setting FAN_BOARD_PIN to a pin number you get a board cooler. That fan
 goes on as soon as moves occur. Mainly to prevent overheating of stepper drivers. */
 //#undef FAN_BOARD_PIN
-//#define FAN_BOARD_PIN ORIG_FAN_PIN
+#define FAN_BOARD_PIN ORIG_BOARD_FAN_PIN
 /** Speed of board fan when on. 0 = off, 255 = max */
-#define BOARD_FAN_SPEED 255
+#define BOARD_FAN_SPEED 120
 /* Speed when no cooling is required. Normally 0 but if you need slightly cooling
 it can be set here */
-#define BOARD_FAN_MIN_SPEED 0
+#define BOARD_FAN_MIN_SPEED 80
 
 /* You can have one additional fan controlled by a temperature. You can set
    set at which temperature it should turn on and at which it should reach max. speed.
