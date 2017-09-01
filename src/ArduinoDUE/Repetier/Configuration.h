@@ -1580,7 +1580,7 @@ Always hard to say since the other angle is 89° in this case!
 #define SDCARDDETECTINVERTED false
 #endif
 /** Show extended directory including file length. Don't use this with Pronterface! */
-#define SD_EXTENDED_DIR 0
+#define SD_EXTENDED_DIR 1
 /** The GCODEs in this line get executed, when you stop a SD print before it was ended.
 Separate commands by \n */
 #define SD_RUN_ON_STOP "M401 ;"
@@ -1594,7 +1594,7 @@ Separate commands by \n */
 #define FEATURE_MEMORY_POSITION 1
 
 /** If a checksum is sent, all future commands must also contain a checksum. Increases reliability especially for binary protocol. */
-#define FEATURE_CHECKSUM_FORCED 1
+#define FEATURE_CHECKSUM_FORCED 0
 
 /** Should support for fan control be compiled in. If you enable this make sure
 the FAN pin is not the same as for your second extruder. RAMPS e.g. has FAN_PIN in 9 which
