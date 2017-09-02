@@ -1608,7 +1608,7 @@ is also used for the heater if you have 2 extruders connected. */
 
 /* By setting FAN_BOARD_PIN to a pin number you get a board cooler. That fan
 goes on as soon as moves occur. Mainly to prevent overheating of stepper drivers. */
-//#undef FAN_BOARD_PIN
+#undef FAN_BOARD_PIN
 #define FAN_BOARD_PIN ORIG_BOARD_FAN_PIN
 /** Speed of board fan when on. 0 = off, 255 = max */
 #define BOARD_FAN_SPEED 120
