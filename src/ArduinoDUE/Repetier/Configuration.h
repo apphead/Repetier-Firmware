@@ -1594,7 +1594,7 @@ Separate commands by \n */
 #define FEATURE_MEMORY_POSITION 1
 
 /** If a checksum is sent, all future commands must also contain a checksum. Increases reliability especially for binary protocol. */
-#define FEATURE_CHECKSUM_FORCED 0
+#define FEATURE_CHECKSUM_FORCED 1
 
 /** Should support for fan control be compiled in. If you enable this make sure
 the FAN pin is not the same as for your second extruder. RAMPS e.g. has FAN_PIN in 9 which
