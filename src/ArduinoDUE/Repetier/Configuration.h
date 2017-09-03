@@ -1394,7 +1394,7 @@ is always running and is not hung up for some unknown reason.
 IMPORTANT: The ARM processors need a special board definition to work properly.
 See: AdditionalArduinoFiles: README.txt on how to install them.
 */
-#define FEATURE_WATCHDOG 0
+#define FEATURE_WATCHDOG 1
 
 /* Z-Probing */
 
