@@ -337,9 +337,9 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT0_SELECT_COMMANDS "M117 Extruder 1"
 #define EXT0_DESELECT_COMMANDS ""
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the extruder on, the fan goes on. */
-#define EXT0_EXTRUDER_COOLER_PIN ORIG_FAN2_PIN
+#define EXT0_EXTRUDER_COOLER_PIN FAN2_PIN
 /** PWM speed for the cooler fan. 0=off 255=full speed */
-#define EXT0_EXTRUDER_COOLER_SPEED 80
+#define EXT0_EXTRUDER_COOLER_SPEED 120
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
 #define EXT0_DECOUPLE_TEST_PERIOD 12000
 /** Pin which toggles regualrly during extrusion allowing jam control. -1 = disabled */
@@ -456,9 +456,9 @@ cog. Direct drive extruder need 0. */
 #define EXT1_SELECT_COMMANDS "M117 Extruder 2"
 #define EXT1_DESELECT_COMMANDS ""
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the extruder on, the fan goes on. */
-#define EXT1_EXTRUDER_COOLER_PIN ORIG_FAN2_PIN
+#define EXT1_EXTRUDER_COOLER_PIN FAN2_PIN
 /** PWM speed for the cooler fan. 0=off 255=full speed */
-#define EXT1_EXTRUDER_COOLER_SPEED 80
+#define EXT1_EXTRUDER_COOLER_SPEED 120
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
 #define EXT1_DECOUPLE_TEST_PERIOD 12000
 /** Pin which toggles regularly during extrusion allowing jam control. -1 = disabled */
@@ -810,7 +810,7 @@ use a mechanical endstop connected with GND. Set value to false for no pull-up
 on this endstop.
 */
 
-#define MULTI_ZENDSTOP_HOMING 0 //Claude: check
+#define MULTI_ZENDSTOP_HOMING 0 //Claude: check feature docs
 
 
 #define ENDSTOP_PULLUP_X_MIN true
@@ -1603,7 +1603,7 @@ Separate commands by \n */
 /** Should support for fan control be compiled in. If you enable this make sure
 the FAN pin is not the same as for your second extruder. RAMPS e.g. has FAN_PIN in 9 which
 is also used for the heater if you have 2 extruders connected. */
-#define FEATURE_FAN_CONTROL false //Claude: must be true for heatsink fan, see FAN_PIN
+#define FEATURE_FAN_CONTROL true //Claude: must be true for heatsink fan, see FAN_PIN
                                   //Claude: set starting temp with EXTRUDER_FAN_COOL_TEMP
 
 /* You can have a second fan controlled by adding P1 to M106/M107 command. */
