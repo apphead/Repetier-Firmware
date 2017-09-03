@@ -218,8 +218,8 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_SDCARDDETECT       14
 #define SDCARDDETECTINVERTED 0
 #define LED_PIN 	   -1
-#define ORIG_FAN_PIN 	   12
-#define ORIG_FAN2_PIN           9
+#define ORIG_FAN_PIN 	   9 //Hotend
+#define ORIG_FAN2_PIN           12 //Heatsink
 #define ORIG_BOARD_FAN_PIN      11
 #define ORIG_PS_ON_PIN          40
 #define KILL_PIN	   -1
