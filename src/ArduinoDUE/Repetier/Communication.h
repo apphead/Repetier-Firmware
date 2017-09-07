@@ -541,3 +541,4 @@ static uint8_t selectedLanguage;
 #endif
 
 #endif // COMMUNICATION_H
+

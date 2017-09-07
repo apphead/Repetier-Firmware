@@ -2024,7 +2024,7 @@ const short temptable_14[NUMTEMPS_14][2] PROGMEM = {
     {571 * 4, 8 * 105}, {611 * 4, 8 * 100}, {681 * 4, 8 * 90}, {711 * 4, 8 * 85}, {811 * 4, 8 * 69}, {831 * 4, 8 * 65}, {881 * 4, 8 * 55},
     {901 * 4, 8 * 51},  {941 * 4, 8 * 39}, {971 * 4, 8 * 28}, {981 * 4, 8 * 23}, {991 * 4, 8 * 17}, {1001 * 4, 8 * 9}, {1021 * 4, 8 * -27}, {1023 * 4, 8 * -200}
 };
-#define NUMTEMPS_15 27 // DYZE DESIGN 500°C Thermistor
+#define NUMTEMPS_15 27 // DYZE DESIGN 500Â°C Thermistor
 const short temptable_15[NUMTEMPS_15][2] PROGMEM = {
     { 18 * 4, 850 * 8 }, { 18 * 4, 500 * 8 }, { 22 * 4, 480 * 8 }, { 27 * 4, 460 * 8 }, { 33 * 4, 440 * 8 }, { 41 * 4, 420 * 8 }, { 52 * 4, 400 * 8 }, { 68 * 4, 380 * 8 }, { 86 * 4, 360 * 8 }, { 112 * 4, 340 * 8 },
     { 147 * 4, 320 * 8 }, { 194 * 4, 300 * 8 }, { 254 * 4, 280 * 8 }, { 330 * 4, 260 * 8 }, { 428 * 4, 240 * 8 }, { 533 * 4, 220 * 8 }, { 646 * 4, 200 * 8 }, { 754 * 4, 180 * 8 }, { 844 * 4, 160 * 8 },
@@ -2268,7 +2268,7 @@ void TemperatureController::updateCurrentTemperature() {
         currentTemperatureC = ((float)currentTemperature * 330.0f / (1024 << (2 - ANALOG_REDUCE_BITS))) - 50.0f;
 #endif
         break;
-    case 100: // AD595 / AD597   10mV/°C
+    case 100: // AD595 / AD597   10mV/Â°C
         //return (int)((long)raw_temp * 500/(1024<<(2-ANALOG_REDUCE_BITS)));
 #if CPU_ARCH == ARCH_AVR
         currentTemperatureC = ((float)currentTemperature * 500.0f / (1024 << (2 - ANALOG_REDUCE_BITS)));
@@ -2414,7 +2414,7 @@ void TemperatureController::autotunePID(float temp, uint8_t controllerId, int ma
                     Com::printF(Com::tAPIDMin, minTemp);
                     Com::printFLN(Com::tAPIDMax, maxTemp);
                     if(cycles > 2) {
-                        // Parameter according Ziegler¡§CNichols method: http://en.wikipedia.org/wiki/Ziegler%E2%80%93Nichols_method
+                        // Parameter according ZieglerÂ¡Â§CNichols method: http://en.wikipedia.org/wiki/Ziegler%E2%80%93Nichols_method
                         Ku = (4.0 * d) / (3.14159 * (maxTemp - minTemp));
                         Tu = static_cast<float>(t_low + t_high) / 1000.0;
                         Com::printF(Com::tAPIDKu, Ku);
@@ -2873,3 +2873,4 @@ TemperatureController *tempController[NUM_TEMPERATURE_LOOPS] = {
 #endif // FAN_THERMO_PIN
 };
 #endif
+

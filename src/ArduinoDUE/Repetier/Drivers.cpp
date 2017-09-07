@@ -247,3 +247,4 @@ void CNCDriver::spindleOnCCW(int32_t rpm)
     HAL::delayMilliseconds(CNC_WAIT_ON_ENABLE);
 }
 #endif
+

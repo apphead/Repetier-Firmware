@@ -182,7 +182,7 @@ Overridden if EEPROM activated.*/
 // extruders or coolers. PDM will give more signal changes per second, so on average it gives
 // the cleaner signal. The only advantage of PWM is giving signals at a fixed rate and never more
 // then PWM.
-#define PDM_FOR_EXTRUDER 1
+#define PDM_FOR_EXTRUDER 0
 #define PDM_FOR_COOLER 0
 
 // The firmware checks if the heater and sensor got decoupled, which is dangerous. Since it will never reach target
@@ -244,11 +244,11 @@ controlled by settings in extruder 0 definition. */
 // 100 is AD595
 // 101 is MAX6675
 // 102 is MAX31855
-#define EXT0_TEMPSENSOR_TYPE 1
+#define EXT0_TEMPSENSOR_TYPE 14
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
 #define EXT0_TEMPSENSOR_PIN TEMP_0_PIN
 // Which pin enables the heater
-#define EXT0_HEATER_PIN HEATER_2_PIN
+#define EXT0_HEATER_PIN HEATER_0_PIN
 #define EXT0_STEP_PIN E0_STEP_PIN
 #define EXT0_DIR_PIN E0_DIR_PIN
 // set to false/true for normal / inverse direction
@@ -373,11 +373,11 @@ The codes are only executed for multiple extruder when changing the extruder. */
 // 99 Generic thermistor table 3
 // 100 is AD595
 // 101 is MAX6675
-#define EXT1_TEMPSENSOR_TYPE 1
+#define EXT1_TEMPSENSOR_TYPE 14
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
 #define EXT1_TEMPSENSOR_PIN TEMP_2_PIN
 // Which pin enables the heater
-#define EXT1_HEATER_PIN HEATER_3_PIN
+#define EXT1_HEATER_PIN HEATER_2_PIN
 #define EXT1_STEP_PIN E1_STEP_PIN
 #define EXT1_DIR_PIN E1_DIR_PIN
 // set to false/true for normal/inverse direction
@@ -518,7 +518,7 @@ Retractions speeds are taken from RETRACTION_SPEED and RETRACTION_UNDO_SPEED
 // New speed multiplier which gets set when slowdown is reached.
 #define JAM_SLOWDOWN_TO 70
 // Last fallback. If we slip this much, we want to pause.
-#define JAM_ERROR_STEPS 430
+#define JAM_ERROR_STEPS 500
 /** To prevent signal bouncing, only consider changes if we are this much steps
  away from last signal change. */
 #define JAM_MIN_STEPS 10
@@ -913,7 +913,7 @@ on this endstop.
 // For delta robot Z_MAX_LENGTH is the maximum travel of the towers and should be set to the distance between the hotend
 // and the platform when the printer is at its home position.
 // If EEPROM is enabled these values will be overridden with the values in the EEPROM
-#define X_MAX_LENGTH 240
+#define X_MAX_LENGTH 263
 #define Y_MAX_LENGTH 295
 #define Z_MAX_LENGTH 210
 
@@ -1073,7 +1073,7 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 */
 #define ZHOME_PRE_RAISE 2
 // Distance in mm to raise if required
-#define ZHOME_PRE_RAISE_DISTANCE 5
+#define ZHOME_PRE_RAISE_DISTANCE 10
 
 /*
  Raises Z before swapping extruder (tool change) and lowers it afterwards
@@ -1116,7 +1116,7 @@ included delay is already enough.
  might be even slower or you are using a fast Arduino board with slow driver. Normally 0 works.
  If you get skewed print, you might try 1 microsecond here.
  */
-#define DIRECTION_DELAY 50
+#define DIRECTION_DELAY 0
 
 /** The firmware can only handle 16000Hz interrupt frequency cleanly. If you need higher speeds
 a faster solution is needed, and this is to double/quadruple the steps in one interrupt call.
@@ -1419,12 +1419,12 @@ to recalibrate z.
 #define EXTRUDER_IS_Z_PROBE 0
 // Disable all heaters before probing - required for inductive sensors
 #define Z_PROBE_DISABLE_HEATERS 0
-#define Z_PROBE_PIN ORIG_Z_MIN_PIN  // 63
+#define Z_PROBE_PIN Z_MIN_PIN  // 63
 #define Z_PROBE_PULLUP 1
 #define Z_PROBE_ON_HIGH 0
 #define Z_PROBE_X_OFFSET -46
 #define Z_PROBE_Y_OFFSET 10
-#define Z_PROBE_BED_DISTANCE 5.0 // Higher than max bed level distance error in mm
+#define Z_PROBE_BED_DISTANCE 10.0 // Higher than max bed level distance error in mm
 
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
@@ -1434,10 +1434,10 @@ to recalibrate z.
 /** Delay before going down. Needed for piezo endstops to reload safely. */
 #define Z_PROBE_DELAY 0
 #define Z_PROBE_XY_SPEED 150
-#define Z_PROBE_SWITCHING_DISTANCE 12 // Distance to safely switch off probe after it was activated
+#define Z_PROBE_SWITCHING_DISTANCE 10 // Distance to safely switch off probe after it was activated
 #define Z_PROBE_REPETITIONS 2 // Repetitions for probing at one point.
 /** The height is the difference between activated probe position and nozzle height. */
-#define Z_PROBE_HEIGHT 2.83
+#define Z_PROBE_HEIGHT 2.13
 /** These scripts are run before resp. after the z-probe is done. Add here code to activate/deactivate probe if needed. */
 #define Z_PROBE_START_SCRIPT "M340 P0 S700 ;"
 #define Z_PROBE_FINISHED_SCRIPT "M340 P0 S1500 ;"
@@ -1584,7 +1584,7 @@ Always hard to say since the other angle is 89° in this case!
 #define SDCARDDETECTINVERTED false
 #endif
 /** Show extended directory including file length. Don't use this with Pronterface! */
-#define SD_EXTENDED_DIR 1
+#define SD_EXTENDED_DIR 0
 /** The GCODEs in this line get executed, when you stop a SD print before it was ended.
 Separate commands by \n */
 #define SD_RUN_ON_STOP "M401 ;"
@@ -1603,17 +1603,17 @@ Separate commands by \n */
 /** Should support for fan control be compiled in. If you enable this make sure
 the FAN pin is not the same as for your second extruder. RAMPS e.g. has FAN_PIN in 9 which
 is also used for the heater if you have 2 extruders connected. */
-#define FEATURE_FAN_CONTROL true //Claude: must be true for heatsink fan, see FAN_PIN
-                                  //Claude: set starting temp with EXTRUDER_FAN_COOL_TEMP
+#define FEATURE_FAN_CONTROL true //Claude: must be true for print cooling fan, see FAN_PIN
+                                  //Claude: controlled by slicer
 
 /* You can have a second fan controlled by adding P1 to M106/M107 command. */
-#define FEATURE_FAN2_CONTROL true //Claude: must be true for print cooling fan, see FAN2_PIN
-                                  //Claude: controlled by slicer
+#define FEATURE_FAN2_CONTROL false //Claude: must be true for heatsink fan, see FAN2_PIN
+                                  //Claude: set starting temp with EXTRUDER_FAN_COOL_TEMP
 
 /* By setting FAN_BOARD_PIN to a pin number you get a board cooler. That fan
 goes on as soon as moves occur. Mainly to prevent overheating of stepper drivers. */
 #undef FAN_BOARD_PIN
-#define FAN_BOARD_PIN ORIG_BOARD_FAN_PIN
+#define FAN_BOARD_PIN HEATER_3_PIN
 /** Speed of board fan when on. 0 = off, 255 = max */
 #define BOARD_FAN_SPEED 120
 /* Speed when no cooling is required. Normally 0 but if you need slightly cooling

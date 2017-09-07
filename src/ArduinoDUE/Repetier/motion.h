@@ -159,7 +159,7 @@ private:
     float speedE;                   ///< Speed in E direction at fullInterval in mm/s
     float fullSpeed;                ///< Desired speed mm/s
     float invFullSpeed;             ///< 1.0/fullSpeed for faster computation
-    float accelerationDistance2;    ///< Real 2.0*distance*acceleration mm²/s²
+    float accelerationDistance2;    ///< Real 2.0*distance*acceleration mmÂ²/sÂ²
     float maxJunctionSpeed;         ///< Max. junction speed between this and next segment
     float startSpeed;               ///< Starting speed in mm/s
     float endSpeed;                 ///< Exit speed in mm/s
@@ -636,3 +636,4 @@ public:
 
 
 #endif // MOTION_H_INCLUDED
+

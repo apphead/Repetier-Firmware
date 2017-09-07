@@ -774,20 +774,20 @@ Jerk = (1-cos(alpha))*min(v1,v2)
 This sets jerk to 0 on zero angle change.
 
         Old               New
-0°:       0               0
-30°:     51,8             13.4
-45°:     76.53            29.3
-90°:    141               100
-180°:   200               200
+0Â°:       0               0
+30Â°:     51,8             13.4
+45Â°:     76.53            29.3
+90Â°:    141               100
+180Â°:   200               200
 
 
 Speed from 100 to 200
         Old               New(min)   New(max)
-0°:     100               0          0
-30°:    123,9             13.4       26.8
-45°:    147.3             29.3       58.6
-90°:    223               100        200
-180°:   300               200        400
+0Â°:     100               0          0
+30Â°:    123,9             13.4       26.8
+45Â°:    147.3             29.3       58.6
+90Â°:    223               100        200
+180Â°:   300               200        400
 
 */
 inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous, PrintLine *current) {
@@ -2763,3 +2763,4 @@ int32_t PrintLine::bresenhamStep() { // version for Cartesian printer
     return interval;
 }
 #endif
+

@@ -201,7 +201,7 @@ Overridden if EEPROM activated.*/
 // Minimum temp. rise we expect after the set duration of full heating is over.
 // Always keep a good safety margin to get no false positives. If your period is e.g. 10 seconds
 // because at startup you already need 7 seconds until heater starts to rise temp. for sensor
-// then you have 3 seconds of increased heating to reach 1°„C.
+// then you have 3 seconds of increased heating to reach 1Â°â€žC.
 #define DECOUPLING_TEST_MIN_TEMP_RISE 1
 // Set to 1 if you want firmware to kill print on decouple
 #define KILL_IF_SENSOR_DEFECT 0
@@ -238,8 +238,8 @@ controlled by settings in extruder 0 definition. */
 // 12 is 100k RS thermistor 198-961
 // 13 is PT100 for E3D/Ultimaker
 // 14 is 100K NTC 3950
-// 15 DYZE DESIGN 500°C Thermistor
-// 16 is B3 innovations 500°C sensor
+// 15 DYZE DESIGN 500Â°C Thermistor
+// 16 is B3 innovations 500Â°C sensor
 // 50 is userdefined thermistor table 0 for PTC thermistors
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors
@@ -1553,9 +1553,9 @@ best bonding with surface. */
 
 /* If your printer is not exactly square but is more like a parallelogram, you can
 use this to compensate the effect of printing squares like parallelograms. Set the
-parameter to then tangents of the deviation from 90° when you print a square object.
-E.g. if you angle is 91° enter tan(1) = 0.017. If error doubles you have the wrong sign.
-Always hard to say since the other angle is 89° in this case!
+parameter to then tangents of the deviation from 90Â° when you print a square object.
+E.g. if you angle is 91Â° enter tan(1) = 0.017. If error doubles you have the wrong sign.
+Always hard to say since the other angle is 89Â° in this case!
 */
 #define FEATURE_AXISCOMP 0
 #define AXISCOMP_TANXY 0
@@ -1680,7 +1680,7 @@ The following settings override uiconfig.h!
 24 or CONTROLLER_ZONESTAR = Zonestar P802M with LCD 20x4 and 5 ADC button keypad
 25 or CONTROLLER_ORCABOTXXLPRO2
 26 or CONTROLLER_AZSMZ_12864
-405 or CONTROLLER_FELIX_DUE Felix LCD für due based board
+405 or CONTROLLER_FELIX_DUE Felix LCD fÃ¼r due based board
 27 or CONTROLLER_REPRAPWORLD_GLCD = ReprapWorld Graphical LCD
 */
 #define FEATURE_CONTROLLER CONTROLLER_RADDS
@@ -1813,3 +1813,4 @@ Values must be in range 1..255
 //#define CUSTOM_EVENTS
 
 #endif
+

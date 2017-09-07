@@ -44,3 +44,4 @@ const unsigned char logo[] PROGMEM = { //AVR-GCC, WinAVR
 #else
 LOGO_BITMAP
 #endif
+

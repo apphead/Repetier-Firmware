@@ -2324,3 +2324,4 @@ class SdFat {
   SdBaseFile vwd_;
 };
 #endif  // SdFat_h
+

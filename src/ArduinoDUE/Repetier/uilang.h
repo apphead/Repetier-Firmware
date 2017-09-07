@@ -1439,7 +1439,7 @@
 #define UI_TEXT_OFF_PT              "Off"
 #define UI_TEXT_NA_PT               "N/A" // Output for not available
 #define UI_TEXT_YES_PT              "Sim"
-#define UI_TEXT_NO_PT               "Não"
+#define UI_TEXT_NO_PT               "NÃ£o"
 #define UI_TEXT_SEL_PT              cSEL
 #define UI_TEXT_NOSEL_PT            cUNSEL
 #define UI_TEXT_PRINT_POS_PT        "Imprimindo..."
@@ -3300,7 +3300,7 @@
 #define UI_TEXT_PAGE_BED_CZ          " B:%eb/%Eb\002C\176%ob"
 #define UI_TEXT_SPEED_MULTIPLY_CZ    "Rychlost:%om%%%"
 #define UI_TEXT_FLOW_MULTIPLY_CZ     "Flow nasobit:%of%%%"
-#define UI_TEXT_SHOW_MEASUREMENT_CZ  "Ukazat merení"
+#define UI_TEXT_SHOW_MEASUREMENT_CZ  "Ukazat merenÃ­"
 #define UI_TEXT_RESET_MEASUREMENT_CZ "Obnovit mereni"
 #define UI_TEXT_SET_MEASURED_ORIGIN_CZ "Set Z=0"
 #define UI_TEXT_ZCALIB_CZ             "Z kalib."
@@ -3335,7 +3335,7 @@
 #define UI_TEXT_AUTOLEVEL_ONOFF_CZ  "Autolevel: %ll"
 #define UI_TEXT_SERVOPOS_CZ "Servo pozice: %oS"
 #define UI_TEXT_IGNORE_M106_CZ      "Ignorovat M106 %Fi"
-#define UI_TEXT_WIZ_REHEAT1_CZ "Klikněte ohrat"
+#define UI_TEXT_WIZ_REHEAT1_CZ "KliknÄ›te ohrat"
 #define UI_TEXT_WIZ_REHEAT2_CZ "extruders."
 #define UI_TEXT_WIZ_WAITTEMP1_CZ "Pockejte na cilove"
 #define UI_TEXT_WIZ_WAITTEMP2_CZ "teploty ..."
@@ -3672,7 +3672,7 @@
 #define UI_TEXT_AUTOLEVEL_ONOFF_PL  "Autopoziomow.: %ll"
 #define UI_TEXT_SERVOPOS_PL         "Pozycja Serwa: %oS"
 #define UI_TEXT_IGNORE_M106_PL      "Ignoruj kom. M106 %Fi"
-#define UI_TEXT_WIZ_REHEAT1_PL "Kliknij aby znów"
+#define UI_TEXT_WIZ_REHEAT1_PL "Kliknij aby znÃ³w"
 #define UI_TEXT_WIZ_REHEAT2_PL "rozgrzac ekstrudery"
 #define UI_TEXT_WIZ_WAITTEMP1_PL "Poczekaj na zadane"
 #define UI_TEXT_WIZ_WAITTEMP2_PL "temperatury ..."
@@ -3790,7 +3790,7 @@
 #define UI_TEXT_MAINPAGE6_4_C_PL "Mul: %om%%%    Spi:%opRPM "
 #define UI_TEXT_JAMCONTROL_PL "%ej Jam Control"
 
-// Türk
+// TÃ¼rk
 
 #define UI_TEXT_ON_TR               "Acik"
 #define UI_TEXT_OFF_TR              "Kapali"
@@ -4062,12 +4062,12 @@
 #define UI_TEXT_EXTR3_TEMP_TR       "Sic. 4 : %E3" cDEG "C"
 #define UI_TEXT_EXTR4_TEMP_TR       "Sic. 5 : %E4" cDEG "C"
 #define UI_TEXT_EXTR5_TEMP_TR       "Sic. 6 : %E5" cDEG "C"
-#define UI_TEXT_EXTR3_OFF_TR "Ext. 4’u kapat"
-#define UI_TEXT_EXTR4_OFF_TR " Ext. 5’i kapat "
-#define UI_TEXT_EXTR5_OFF_TR " Ext. 6’yi kapat "
-#define UI_TEXT_EXTR3_SELECT_TR "%X3 Ext. 4’u sec "
-#define UI_TEXT_EXTR4_SELECT_TR "%X4 Ext. 5’i sec "
-#define UI_TEXT_EXTR5_SELECT_TR "%X5 Ext. 6’yi sec "
+#define UI_TEXT_EXTR3_OFF_TR "Ext. 4â€™u kapat"
+#define UI_TEXT_EXTR4_OFF_TR " Ext. 5â€™i kapat "
+#define UI_TEXT_EXTR5_OFF_TR " Ext. 6â€™yi kapat "
+#define UI_TEXT_EXTR3_SELECT_TR "%X3 Ext. 4â€™u sec "
+#define UI_TEXT_EXTR4_SELECT_TR "%X4 Ext. 5â€™i sec "
+#define UI_TEXT_EXTR5_SELECT_TR "%X5 Ext. 6â€™yi sec "
 #define UI_TEXT_DITTO_0_TR "%D0 Kopyalama"
 #define UI_TEXT_DITTO_1_TR "%D1 1 kopya"
 #define UI_TEXT_DITTO_2_TR "%D2 2 kopya"
@@ -4353,7 +4353,7 @@
 #define UI_TEXT_BUILDTAK_FI "BuildTak"
 #define UI_TEXT_KAPTON_FI "Kapton"
 #define UI_TEXT_BLUETAPE_FI "Sininen paperi teippi"
-#define UI_TEXT_PETTAPE_FI "Vihreä PET teippi"
+#define UI_TEXT_PETTAPE_FI "VihreÃ¤ PET teippi"
 #define UI_TEXT_GLUESTICK_FI "Liimapuikko"
 #define UI_TEXT_CUSTOM_FI "Mukautettu"
 #define UI_TEXT_COATING_CUSTOM_FI "Mukautettu:%BCmm"
@@ -4477,3 +4477,4 @@
 #define CUSTOM_TRANS_TR
 #define CUSTOM_TRANS_FI
 #endif
+

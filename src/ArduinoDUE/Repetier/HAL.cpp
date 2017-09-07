@@ -1345,3 +1345,4 @@ RFDoubleSerial BTAdapter;
 // watchdog. We do not need that as we do this our self.
 void watchdogSetup(void) {
 }
+

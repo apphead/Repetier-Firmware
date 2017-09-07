@@ -333,7 +333,7 @@ struct UIMenu_s {
   // 2 = sub menu
   // 3 = modification menu
   // 5 = Wizard menu
-  // +128 = sticky -> no autoreturn to main menuü after timeout
+  // +128 = sticky -> no autoreturn to main menuÃ¼ after timeout
   uint8_t menuType;
   int id; // Type of modification
   int numEntries;
@@ -672,4 +672,5 @@ extern UIDisplay uid;
 
 
 #endif
+
 
