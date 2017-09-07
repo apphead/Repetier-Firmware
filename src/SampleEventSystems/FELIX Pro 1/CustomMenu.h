@@ -629,9 +629,9 @@ UI_MENU_CHANGEACTION_FILTER_T(ui_menu_ext_temp0_printing, UI_TEXT_EXTR0_TEMP_ID,
 #define UI_TEMP0_PRINTING
 #define UI_TEMP0_CNT 0
 #endif
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
 UI_MENU_CHANGEACTION_T(ui_menu_ext_temp1, UI_TEXT_EXTR1_TEMP_ID, UI_ACTION_EXTRUDER1_TEMP)
 UI_MENU_CHANGEACTION_FILTER_T(ui_menu_ext_temp1_printing, UI_TEXT_EXTR1_TEMP_ID, UI_ACTION_EXTRUDER1_TEMP,MENU_MODE_PRINTING,0)
+#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
 #define UI_TEMP1_PRINTING ,&ui_menu_ext_temp1_printing
 #define UI_TEMP1_CNT 1
 #else
@@ -934,9 +934,14 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_debug, "Write Debug", UI_ACTION_WRITE_DEBUG)
 
 UI_MENU_HEADLINE_T(ui_menu_chf_head,UI_TEXT_CHANGE_FILAMENT_ID)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_cf_sel1,UI_CTEXT_SELECT_EX1_ID,UI_ACTION_FC_SELECT1)
+#if NUM_EXTRUDER == 1
+#define UI_MENU_CF1 {&ui_menu_chf_head, UI_MENU_ADDCONDBACK &ui_menu_cf_sel1}
+UI_MENU(ui_menu_chf, UI_MENU_CF1 , 2+UI_MENU_BACKCNT)
+#else
 UI_MENU_ACTIONCOMMAND_T(ui_menu_cf_sel2,UI_CTEXT_SELECT_EX2_ID,UI_ACTION_FC_SELECT2)
 #define UI_MENU_CF1 {&ui_menu_chf_head, UI_MENU_ADDCONDBACK &ui_menu_cf_sel1,&ui_menu_cf_sel2}
 UI_MENU(ui_menu_chf, UI_MENU_CF1 , 3+UI_MENU_BACKCNT)
+#endif
 
 // Change filament level 2 - material selection
 
@@ -979,6 +984,7 @@ O Extruder 2
 Temp. 170/180
 Continue
 Close */
+
 UI_MENU_CHANGEACTION_T(ui_menu_chf_temp,UI_TEXT_CUR_TEMP_ID,UI_ACTION_EXTRUDER_TEMP)
 UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_pla,"PLA",UI_ACTION_SPH_PLA_ACTIVE)
 UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_petg,"PETG",UI_ACTION_SPH_PETG_ACTIVE)
@@ -993,8 +999,13 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_chf_close,UI_TEXT_CLOSE_ID,UI_ACTION_BACK)
 &ui_menu_chf_sph_pla,&ui_menu_chf_sph_petg,&ui_menu_chf_sph_pva,&ui_menu_chf_sph_flex,&ui_menu_chf_sph_abs,&ui_menu_chf_sph_glass,&ui_menu_chf_sph_wood,\
 &ui_menu_chf_continue,&ui_menu_chf_close}
 //UI_STICKYMENU(ui_menu_chf,UI_MENU_CHF_ITEMS,11+UI_MENU_EXTSEL_CNT) 
+#if NUM_EXTRUDER == 1
+UI_MENU_SUBMENU_T(ui_menu_quick_changefil,UI_TEXT_CHANGE_FILAMENT_ID,ui_menu_ch2)   
+UI_MENU_SUBMENU_FILTER_T(ui_menu_quick_changefil_printing,UI_TEXT_CHANGE_FILAMENT_ID,ui_menu_ch2,MENU_MODE_PRINTING,0)
+#else
 UI_MENU_SUBMENU_T(ui_menu_quick_changefil,UI_TEXT_CHANGE_FILAMENT_ID,ui_menu_chf)   
-UI_MENU_SUBMENU_FILTER_T(ui_menu_quick_changefil_printing,UI_TEXT_CHANGE_FILAMENT_ID,ui_menu_chf,MENU_MODE_PRINTING,0)
+UI_MENU_SUBMENU_FILTER_T(ui_menu_quick_changefil_printing,UI_TEXT_CHANGE_FILAMENT_ID,ui_menu_ch2,MENU_MODE_PRINTING,0)
+#endif
 //UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_changefil, UI_TEXT_CHANGE_FILAMENT_ID, UI_ACTION_WIZARD_FILAMENTCHANGE)
 //UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_quick_changefil_printing, UI_TEXT_CHANGE_FILAMENT_ID, UI_ACTION_WIZARD_FILAMENTCHANGE,MENU_MODE_PRINTING,0)
 #define UI_CHANGE_FIL_CNT 1
