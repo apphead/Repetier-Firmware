@@ -883,3 +883,4 @@ bool GCodeFileInfo::findTotalHeight(char *buf, float &height) {
 }
 #endif // JSON_OUTPUT
 
+

@@ -70,7 +70,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 
 #define MOTHERBOARD 402
 //#define RFSERIAL SerialUSB
-//#define SERIAL_PORT 1
+//#define SERIAL_PORT 0
 #include "pins.h"
 
 // Override pin definitions from pins.h
@@ -196,7 +196,7 @@ Overridden if EEPROM activated.*/
 // Minimum temp. rise we expect after the set duration of full heating is over.
 // Always keep a good safety margin to get no false positives. If your period is e.g. 10 seconds
 // because at startup you already need 7 seconds until heater starts to rise temp. for sensor
-// then you have 3 seconds of increased heating to reach 1°„C.
+// then you have 3 seconds of increased heating to reach 1Â°â€žC.
 #define DECOUPLING_TEST_MIN_TEMP_RISE 1
 // Set to 1 if you want firmware to kill print on decouple
 #define KILL_IF_SENSOR_DEFECT 0
@@ -913,8 +913,8 @@ on this endstop.
 // For delta robot Z_MAX_LENGTH is the maximum travel of the towers and should be set to the distance between the hotend
 // and the platform when the printer is at its home position.
 // If EEPROM is enabled these values will be overridden with the values in the EEPROM
-#define X_MAX_LENGTH 263
-#define Y_MAX_LENGTH 295
+#define X_MAX_LENGTH 270
+#define Y_MAX_LENGTH 310
 #define Z_MAX_LENGTH 210
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
@@ -1051,9 +1051,9 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 #define MAX_FEEDRATE_Z 50
 
 /** Home position speed in mm/s. Overridden if EEPROM activated. */
-#define HOMING_FEEDRATE_X 80
-#define HOMING_FEEDRATE_Y 80
-#define HOMING_FEEDRATE_Z 5
+#define HOMING_FEEDRATE_X 150
+#define HOMING_FEEDRATE_Y 150
+#define HOMING_FEEDRATE_Z 6
 
 /** Set order of axis homing. Use HOME_ORDER_XYZ and replace XYZ with your order.
  * If you measure Z with your extruder tip you need a hot extruder to get right measurement. In this
@@ -1061,7 +1061,7 @@ Mega. Used only for nonlinear systems like delta or tuga. */
  * first a z home to get some reference, then raise to ZHOME_HEAT_HEIGHT do xy homing and then after
  * heating to minimum ZHOME_MIN_TEMPERATURE will z home again for correct height.
  * */
-#define HOMING_ORDER HOME_ORDER_XYTZ //Claude: zwingend XYTZ wählen, sonst funktioniert BLTouch nicht!
+#define HOMING_ORDER HOME_ORDER_XYTZ //Claude: zwingend XYTZ wÃ¤hlen, sonst funktioniert BLTouch nicht!
 /*
   Raise Z befor ehoming z axis
   0 = no
@@ -1073,7 +1073,7 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 */
 #define ZHOME_PRE_RAISE 2
 // Distance in mm to raise if required
-#define ZHOME_PRE_RAISE_DISTANCE 10
+#define ZHOME_PRE_RAISE_DISTANCE 15
 
 /*
  Raises Z before swapping extruder (tool change) and lowers it afterwards
@@ -1262,7 +1262,7 @@ to activate the quadratic term. Only adds lots of computations and storage usage
 
  Overridden if EEPROM activated.
 */
-//#define BAUDRATE 76800
+//#define BAUDRATE 57600
 #define BAUDRATE 250000
 //#define BAUDRATE 115200 250000
 
@@ -1312,7 +1312,7 @@ matches, the stored values are used to overwrite the settings.
 IMPORTANT: With mode <>0 some changes in Configuration.h are not set any more, as they are
            taken from the EEPROM.
 */
-#define EEPROM_MODE 1
+#define EEPROM_MODE 3
 
 
 /**************** duplicate motor driver ***************
@@ -1424,7 +1424,7 @@ to recalibrate z.
 #define Z_PROBE_ON_HIGH 0
 #define Z_PROBE_X_OFFSET -46
 #define Z_PROBE_Y_OFFSET 10
-#define Z_PROBE_BED_DISTANCE 10.0 // Higher than max bed level distance error in mm
+#define Z_PROBE_BED_DISTANCE 3.9 // Higher than max bed level distance error in mm
 
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
@@ -1552,9 +1552,9 @@ best bonding with surface. */
 
 /* If your printer is not exactly square but is more like a parallelogram, you can
 use this to compensate the effect of printing squares like parallelograms. Set the
-parameter to then tangens of the deviation from 90° when you print a square object.
-E.g. if you angle is 91° enter tan(1) = 0.017. If error doubles you have the wrong sign.
-Always hard to say since the other angle is 89° in this case!
+parameter to then tangens of the deviation from 90Â° when you print a square object.
+E.g. if you angle is 91Â° enter tan(1) = 0.017. If error doubles you have the wrong sign.
+Always hard to say since the other angle is 89Â° in this case!
 */
 #define FEATURE_AXISCOMP 0
 #define AXISCOMP_TANXY 0
@@ -1677,7 +1677,7 @@ The following settings override uiconfig.h!
 20 or CONTROLLER_BAM_DICE_DUE  DAM&DICE Due LCD Display
 21 or CONTROLLER_VIKI2 Panucatt Viki2 graphic lcd
 24 or CONTROLLER_ZONESTAR = Zonestar P802M with LCD 20x4 and 5 ADC button keypad
-405 or CONTROLLER_FELIX_DUE Felix LCD für due based board
+405 or CONTROLLER_FELIX_DUE Felix LCD fÃ¼r due based board
 */
 #define FEATURE_CONTROLLER CONTROLLER_RADDS
 
@@ -1809,3 +1809,4 @@ Values must be in range 1..255
 //#define CUSTOM_EVENTS
 
 #endif
+
