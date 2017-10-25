@@ -89,7 +89,17 @@ ufast8_t PrintLine::linesPos = 0;                 ///< Position for executing li
 
 /**
 Move printer the given number of steps. Puts the move into the queue. Used by e.g. homing commands.
-Does not consider rotation but updates position correctly considering rotation.
+Does not consider rotation but updates position correctly considering rotation. This can be used to
+correct positions when changing tools.
+
+\param x Distance in x direction in steps
+\param y Distance in y direction in steps
+\param z Distance in z direction in steps
+\param e Distance in e direction in steps
+\param feedrate Feed rate to be used in mm/s. Gets new active feedrate.
+\param waitEnd If true will block until move is finished.
+\param checkEndstop True if triggering endstop should stop move.
+\param pathOptimize If false start and end speeds get fixed to minimum values.
 */
 void PrintLine::moveRelativeDistanceInSteps(int32_t x, int32_t y, int32_t z, int32_t e, float feedrate, bool waitEnd, bool checkEndstop, bool pathOptimize) {
 #if NUM_EXTRUDER > 0
@@ -135,6 +145,17 @@ void PrintLine::moveRelativeDistanceInSteps(int32_t x, int32_t y, int32_t z, int
     previousMillisCmd = HAL::timeInMilliseconds();
 }
 
+/** Adds the steps converted to mm to the lastCmdPos position and moves to that position using Printer::moveToReal.
+Will use Printer::isPositionAllowed to prevent illegal moves.
+
+\param x Distance in x direction in steps
+\param y Distance in y direction in steps
+\param z Distance in z direction in steps
+\param e Distance in e direction in steps
+\param feedrate Feed rate to be used in mm/s. Gets new active feedrate.
+\param waitEnd If true will block until move is finished.
+\param pathOptimize If false start and end speeds get fixed to minimum values.
+*/
 void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z, int32_t e, float feedrate, bool waitEnd, bool pathOptimize) {
 #if MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
     if(!Printer::isHoming() && !Printer::isNoDestinationCheck()) { // prevent movements when not homed
@@ -298,6 +319,7 @@ void PrintLine::queueCartesianSegmentTo(uint8_t check_endstops, uint8_t pathOpti
   @param check_endstops Read end stop during move.
 */
 void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize) {
+	ENSURE_POWER
 #if LAZY_DUAL_X_AXIS
     if(Printer::sledParked && (Printer::currentPositionSteps[X_AXIS] != Printer::destinationSteps[X_AXIS] ||
                                Printer::currentPositionSteps[Y_AXIS] != Printer::destinationSteps[Y_AXIS] ||
@@ -1501,6 +1523,40 @@ bool NonlinearSegment::checkEndstops(PrintLine *cur, bool checkall) {
             cur->setYMoveFinished();
             r = 1;
         }
+#if MULTI_ZENDSTOP_HOMING
+        {
+            if(Printer::isHoming()) {
+                if(isZNegativeMove()) {
+                    if(Endstops::zMin())
+                        Printer::multiZHomeFlags &= ~1;
+                    if(Endstops::z2MinMax())
+                        Printer::multiZHomeFlags &= ~2;
+                    if(Printer::multiZHomeFlags == 0)
+                        setZMoveFinished();
+                } else if(isZPositiveMove()) {
+                    if(Endstops::zMax())
+                        Printer::multiZHomeFlags &= ~1;
+                    if(Endstops::z2MinMax())
+                        Printer::multiZHomeFlags &= ~2;
+                    if(Printer::multiZHomeFlags == 0) {
+                        setZMoveFinished();
+                        cur->setZMoveFinished();
+                        r = 1;
+                    }
+                }
+            } else {
+                if(isZNegativeMove() && Endstops::zMin()) {
+                    setZMoveFinished();
+                    cur->setZMoveFinished();
+                    r = 1;
+                } else if(isZPositiveMove() && Endstops::zMax()) {
+                    setZMoveFinished();
+                    cur->setZMoveFinished();
+                    r = 1;
+                }
+            }
+        }
+#else
         if(cur->isZPositiveMove() && Endstops::zMax()) {
             setZMoveFinished();
             cur->setZMoveFinished();
@@ -1511,6 +1567,7 @@ bool NonlinearSegment::checkEndstops(PrintLine *cur, bool checkall) {
             cur->setZMoveFinished();
             r = 1;
         }
+#endif
 #else
         // endstops are per motor and do not depend on global axis movement
         if(isXPositiveMove() && Endstops::xMax()) {
@@ -1798,6 +1855,7 @@ inline void PrintLine::queueEMove(int32_t extrudeDiff, uint8_t check_endstops, u
   @param softEndstop check if we go out of bounds.
 */
 uint8_t PrintLine::queueNonlinearMove(uint8_t check_endstops, uint8_t pathOptimize, uint8_t softEndstop) {
+	ENSURE_POWER
     //if (softEndstop && Printer::destinationSteps[Z_AXIS] < 0) Printer::destinationSteps[Z_AXIS] = 0; // now constrained at entry level including cylinder test
     EVENT_CONTRAIN_DESTINATION_COORDINATES
     int32_t difference[E_AXIS_ARRAY];
@@ -2243,6 +2301,15 @@ int32_t PrintLine::bresenhamStep() { // Version for delta printer
             LaserDriver::changeIntensity(cur->secondSpeed);
         }
 #endif
+#if MULTI_XENDSTOP_HOMING
+		Printer::multiXHomeFlags = MULTI_XENDSTOP_ALL;  // move all x motors until endstop says differently
+#endif
+#if MULTI_YENDSTOP_HOMING
+		Printer::multiYHomeFlags = MULTI_YENDSTOP_ALL;  // move all y motors until endstop says differently
+#endif
+#if MULTI_ZENDSTOP_HOMING
+		Printer::multiZHomeFlags = MULTI_ZENDSTOP_ALL;  // move all z motors until endstop says differently
+#endif
         return Printer::interval; // Wait an other 50% from last step to make the 100% full
     } // End cur=0
     HAL::allowInterrupts();
@@ -2610,6 +2677,12 @@ int32_t PrintLine::bresenhamStep() { // version for Cartesian printer
         else if(Printer::mode == PRINTER_MODE_LASER) {
             LaserDriver::changeIntensity(cur->secondSpeed);
         }
+#endif
+#if MULTI_XENDSTOP_HOMING
+		Printer::multiXHomeFlags = MULTI_XENDSTOP_ALL;  // move all x motors until endstop says differently
+#endif
+#if MULTI_YENDSTOP_HOMING
+		Printer::multiYHomeFlags = MULTI_YENDSTOP_ALL;  // move all y motors until endstop says differently
 #endif
 #if MULTI_ZENDSTOP_HOMING
         Printer::multiZHomeFlags = MULTI_ZENDSTOP_ALL;  // move all z motors until endstop says differently
