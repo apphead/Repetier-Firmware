@@ -70,7 +70,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 
 #define MOTHERBOARD 402
 //#define RFSERIAL SerialUSB
-//#define SERIAL_PORT 0
+#define SERIAL_PORT -1
 #include "pins.h"
 
 // Override pin definitions from pins.h
@@ -182,7 +182,7 @@ Overridden if EEPROM activated.*/
 // extruders or coolers. PDM will give more signal changes per second, so on average it gives
 // the cleaner signal. The only advantage of PWM is giving signals at a fixed rate and never more
 // then PWM.
-#define PDM_FOR_EXTRUDER 0
+#define PDM_FOR_EXTRUDER 1
 #define PDM_FOR_COOLER 0
 
 // The firmware checks if the heater and sensor got decoupled, which is dangerous. Since it will never reach target
@@ -202,7 +202,7 @@ Overridden if EEPROM activated.*/
 #define KILL_IF_SENSOR_DEFECT 0
 
 // for each extruder, fan will stay on until extruder temperature is below this value
-#define EXTRUDER_FAN_COOL_TEMP 45
+#define EXTRUDER_FAN_COOL_TEMP 50
 // Retraction for sd pause over lcd
 #define RETRACT_ON_PAUSE 2
 // These commands get executed after storing position and going to park position.
@@ -244,16 +244,16 @@ controlled by settings in extruder 0 definition. */
 // 100 is AD595
 // 101 is MAX6675
 // 102 is MAX31855
-#define EXT0_TEMPSENSOR_TYPE 14
+#define EXT0_TEMPSENSOR_TYPE 1
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
-#define EXT0_TEMPSENSOR_PIN TEMP_0_PIN
+#define EXT0_TEMPSENSOR_PIN TEMP_0_PIN //Claude Correct
 // Which pin enables the heater
-#define EXT0_HEATER_PIN HEATER_0_PIN
-#define EXT0_STEP_PIN E0_STEP_PIN
-#define EXT0_DIR_PIN E0_DIR_PIN
+#define EXT0_HEATER_PIN HEATER_0_PIN //Claude Correct
+#define EXT0_STEP_PIN E4_STEP_PIN
+#define EXT0_DIR_PIN E4_DIR_PIN
 // set to false/true for normal / inverse direction
 #define EXT0_INVERSE false
-#define EXT0_ENABLE_PIN E0_ENABLE_PIN
+#define EXT0_ENABLE_PIN E4_ENABLE_PIN
 /* Set to 1 to mirror motor. Pins for mirrored motor are below */
 #define EXT0_MIRROR_STEPPER 0
 #define EXT0_STEP2_PIN E0_STEP_PIN
@@ -282,7 +282,7 @@ controlled by settings in extruder 0 definition. */
 */
 #define EXT0_HEAT_MANAGER 1
 /** Wait x seconds, after reaching target temperature. Only used for M109.  Overridden if EEPROM activated. */
-#define EXT0_WATCHPERIOD 1
+#define EXT0_WATCHPERIOD 3
 
 /** \brief The maximum value, I-gain can contribute to the output.
 
@@ -337,7 +337,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT0_SELECT_COMMANDS "M117 Extruder 1"
 #define EXT0_DESELECT_COMMANDS ""
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the extruder on, the fan goes on. */
-#define EXT0_EXTRUDER_COOLER_PIN FAN2_PIN
+#define EXT0_EXTRUDER_COOLER_PIN ORIG_FAN2_PIN
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT0_EXTRUDER_COOLER_SPEED 120
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
@@ -373,16 +373,16 @@ The codes are only executed for multiple extruder when changing the extruder. */
 // 99 Generic thermistor table 3
 // 100 is AD595
 // 101 is MAX6675
-#define EXT1_TEMPSENSOR_TYPE 14
+#define EXT1_TEMPSENSOR_TYPE 1
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
-#define EXT1_TEMPSENSOR_PIN TEMP_2_PIN
+#define EXT1_TEMPSENSOR_PIN TEMP_2_PIN //Claude Correct
 // Which pin enables the heater
-#define EXT1_HEATER_PIN HEATER_2_PIN
-#define EXT1_STEP_PIN E1_STEP_PIN
-#define EXT1_DIR_PIN E1_DIR_PIN
+#define EXT1_HEATER_PIN HEATER_2_PIN //Claude Correct
+#define EXT1_STEP_PIN E3_STEP_PIN
+#define EXT1_DIR_PIN E3_DIR_PIN
 // set to false/true for normal/inverse direction
 #define EXT1_INVERSE false
-#define EXT1_ENABLE_PIN E1_ENABLE_PIN
+#define EXT1_ENABLE_PIN E3_ENABLE_PIN
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
 #define EXT1_ENABLE_ON 1
 /* Set to 1 to mirror motor. Pins for mirrored motor are below */
@@ -409,7 +409,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 */
 #define EXT1_HEAT_MANAGER 1
 /** Wait x seconds, after reaching target temperature. Only used for M109.  Overridden if EEPROM activated. */
-#define EXT1_WATCHPERIOD 1
+#define EXT1_WATCHPERIOD 3
 
 /** \brief The maximum value, I-gain can contribute to the output.
 
@@ -456,7 +456,7 @@ cog. Direct drive extruder need 0. */
 #define EXT1_SELECT_COMMANDS "M117 Extruder 2"
 #define EXT1_DESELECT_COMMANDS ""
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the extruder on, the fan goes on. */
-#define EXT1_EXTRUDER_COOLER_PIN FAN2_PIN
+#define EXT1_EXTRUDER_COOLER_PIN ORIG_FAN2_PIN
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT1_EXTRUDER_COOLER_SPEED 120
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
@@ -518,7 +518,7 @@ Retractions speeds are taken from RETRACTION_SPEED and RETRACTION_UNDO_SPEED
 // New speed multiplier which gets set when slowdown is reached.
 #define JAM_SLOWDOWN_TO 70
 // Last fallback. If we slip this much, we want to pause.
-#define JAM_ERROR_STEPS 500
+#define JAM_ERROR_STEPS 430
 /** To prevent signal bouncing, only consider changes if we are this much steps
  away from last signal change. */
 #define JAM_MIN_STEPS 10
@@ -683,9 +683,9 @@ Value is used for all generic tables created. */
 // set to 0 if you don't have a heated bed
 #define HEATED_BED_SENSOR_TYPE 1
 /** Analog pin of analog sensor to read temperature of heated bed.  */
-#define HEATED_BED_SENSOR_PIN TEMP_1_PIN
+#define HEATED_BED_SENSOR_PIN TEMP_1_PIN //Claude correct
 /** \brief Pin to enable heater for bed. */
-#define HEATED_BED_HEATER_PIN HEATER_1_PIN
+#define HEATED_BED_HEATER_PIN HEATER_1_PIN //Claude correct
 // How often the temperature of the heated bed is set (msec)
 #define HEATED_BED_SET_INTERVAL 3000
 
@@ -737,7 +737,7 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 //hot end to reach the target temperature, but should be set to the time it
 //takes to reach the minimum temperature your thermistor can read. The lower
 //the better/safer, and shouldn't need to be more than 30 seconds (30000)
-#define MILLISECONDS_PREHEAT_TIME 15000
+#define MILLISECONDS_PREHEAT_TIME 30000
 
 // ##########################################################################################
 // ##                             Laser configuration                                      ##
@@ -819,21 +819,23 @@ on this endstop.
 #define ENDSTOP_PULLUP_X_MAX true
 #define ENDSTOP_PULLUP_Y_MAX true
 #define ENDSTOP_PULLUP_Z_MAX true
+#define ENDSTOP_PULLUP_Z2_MINMAX true
 
 // Set to true to invert the logic of the endstops
 #define ENDSTOP_X_MIN_INVERTING true
 #define ENDSTOP_Y_MIN_INVERTING true
 #define ENDSTOP_Z_MIN_INVERTING false
-#define ENDSTOP_X_MAX_INVERTING false
+#define ENDSTOP_X_MAX_INVERTING true
 #define ENDSTOP_Y_MAX_INVERTING false
 #define ENDSTOP_Z_MAX_INVERTING true
+#define ENDSTOP_Z2_MINMAX_INVERTING true
 
 // Set the values true where you have a hardware endstop. The Pin number is taken from pins.h.
 
 #define MIN_HARDWARE_ENDSTOP_X true
 #define MIN_HARDWARE_ENDSTOP_Y true
 #define MIN_HARDWARE_ENDSTOP_Z true
-#define MAX_HARDWARE_ENDSTOP_X false
+#define MAX_HARDWARE_ENDSTOP_X true
 #define MAX_HARDWARE_ENDSTOP_Y false
 #define MAX_HARDWARE_ENDSTOP_Z true
 
@@ -876,7 +878,7 @@ on this endstop.
 //// ADVANCED SETTINGS - to tweak parameters
 
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
-#define X_ENABLE_ON 1
+#define X_ENABLE_ON 1 //Must be 1 for RAPS128
 #define Y_ENABLE_ON 1
 #define Z_ENABLE_ON 1
 
@@ -885,6 +887,7 @@ on this endstop.
 #define DISABLE_Y false
 #define DISABLE_Z false
 #define DISABLE_E true
+
 /* If you want to keep z motor running on stepper timeout, remove comments below.
   This may be useful if your z bed moves when motors are disabled. Will still
   turn z off when heaters get also disabled.
@@ -894,7 +897,7 @@ on this endstop.
 // Inverting axis direction
 #define INVERT_X_DIR true
 #define INVERT_Y_DIR true
-#define INVERT_Z_DIR true
+#define INVERT_Z_DIR false
 
 //// ENDSTOP SETTINGS:
 // Sets direction of endstops when homing; 1=MAX, -1=MIN
@@ -918,10 +921,10 @@ on this endstop.
 // If during homing the endstop is reached, ho many mm should the printer move back for the second try
 #define ENDSTOP_X_BACK_MOVE 5
 #define ENDSTOP_Y_BACK_MOVE 5
-#define ENDSTOP_Z_BACK_MOVE 5
+#define ENDSTOP_Z_BACK_MOVE 2
 // If you do z min homing, you might want to rise extruder a bit after homing so it does not heat
 // touching your bed.
-#define Z_UP_AFTER_HOME 10
+#define Z_UP_AFTER_HOME 15
 
 // For higher precision you can reduce the speed for the second test on the endstop
 // during homing operation. The homing speed is divided by the value. 1 = same speed, 2 = half speed
@@ -944,8 +947,8 @@ on this endstop.
 // For delta robot Z_MAX_LENGTH is the maximum travel of the towers and should be set to the distance between the hotend
 // and the platform when the printer is at its home position.
 // If EEPROM is enabled these values will be overridden with the values in the EEPROM
-#define X_MAX_LENGTH 270
-#define Y_MAX_LENGTH 310
+#define X_MAX_LENGTH 243
+#define Y_MAX_LENGTH 295
 #define Z_MAX_LENGTH 210
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
@@ -1348,7 +1351,7 @@ matches, the stored values are used to overwrite the settings.
 IMPORTANT: With mode <>0 some changes in Configuration.h are not set any more, as they are
            taken from the EEPROM.
 */
-#define EEPROM_MODE 3
+#define EEPROM_MODE 1
 
 
 /**************** duplicate motor driver ***************
@@ -1357,15 +1360,15 @@ If you have an unused extruder stepper free, you could use it to drive the secon
 instead of driving both with a single stepper. The same works for the other axis if needed.
 */
 
-#define FEATURE_TWO_XSTEPPER 0
-#define X2_STEP_PIN   E1_STEP_PIN
-#define X2_DIR_PIN    E1_DIR_PIN
-#define X2_ENABLE_PIN E1_ENABLE_PIN
+#define FEATURE_TWO_XSTEPPER 1
+#define X2_STEP_PIN   E2_STEP_PIN
+#define X2_DIR_PIN    E2_DIR_PIN
+#define X2_ENABLE_PIN E2_ENABLE_PIN
 
 /* Dual x axis mean having a printer with x motors and each controls one
 extruder position. In that case you can also have different resolutions for the
 2 motors. */
-#define DUAL_X_AXIS 0
+#define DUAL_X_AXIS 2
 #define DUAL_X_RESOLUTION 0
 #define X2AXIS_STEPS_PER_MM 100
 
@@ -1375,9 +1378,9 @@ extruder position. In that case you can also have different resolutions for the
 #define Y2_ENABLE_PIN E1_ENABLE_PIN
 
 #define FEATURE_TWO_ZSTEPPER 1
-#define Z2_STEP_PIN   E2_STEP_PIN
-#define Z2_DIR_PIN    E2_DIR_PIN
-#define Z2_ENABLE_PIN E2_ENABLE_PIN
+#define Z2_STEP_PIN   E0_STEP_PIN
+#define Z2_DIR_PIN    E0_DIR_PIN
+#define Z2_ENABLE_PIN E0_ENABLE_PIN
 
 #define FEATURE_THREE_ZSTEPPER 0
 #define Z3_STEP_PIN   E2_STEP_PIN
@@ -1457,8 +1460,8 @@ to recalibrate z.
 // Especially if you have more then 1 extruder acting as z probe this is important!
 #define EXTRUDER_IS_Z_PROBE 0
 // Disable all heaters before probing - required for inductive sensors
-#define Z_PROBE_DISABLE_HEATERS 0
-#define Z_PROBE_PIN Z_MIN_PIN  // 63
+#define Z_PROBE_DISABLE_HEATERS 1
+#define Z_PROBE_PIN ORIG_Z_MIN_PIN  // 63
 #define Z_PROBE_PULLUP 1
 #define Z_PROBE_ON_HIGH 0
 #define Z_PROBE_X_OFFSET -46
@@ -1817,7 +1820,7 @@ Values must be in range 1..255
 // ###############################################################################
 
 // Extreme values
-#define UI_SET_MIN_HEATED_BED_TEMP  55
+#define UI_SET_MIN_HEATED_BED_TEMP  50
 #define UI_SET_MAX_HEATED_BED_TEMP 120
 #define UI_SET_MIN_EXTRUDER_TEMP   160
 #define UI_SET_MAX_EXTRUDER_TEMP   270

@@ -155,7 +155,7 @@ STEPPER_CURRENT_CONTROL
 #define HEATER_2_PIN     12
 // Due analog pin #55
 #define TEMP_2_PIN       6
-#define HEATER_3_PIN     11
+#define HEATER_3_PIN     8
 // Due analog pin #56
 #define TEMP_3_PIN       5
 // Due analog pin #57
@@ -202,7 +202,6 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_E5_DIR_PIN     66
 #define ORIG_E5_ENABLE_PIN  68
 
-
 #define EXTENSION_BOARD_MS1 67
 #define EXTENSION_BOARD_MS2 68
 #define EXTENSION_BOARD_MS3 69
@@ -218,8 +217,8 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_SDCARDDETECT       14
 #define SDCARDDETECTINVERTED 0
 #define LED_PIN 	   -1
-#define ORIG_FAN_PIN 	   8 //Hotend
-#define ORIG_FAN2_PIN           9 //Heatsink
+#define ORIG_FAN_PIN 	   9 //Hotend
+#define ORIG_FAN2_PIN           11 //Heatsink
 #define ORIG_PS_ON_PIN          40
 #define KILL_PIN	   -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
