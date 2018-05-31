@@ -41,7 +41,7 @@ float Printer::maxTravelAccelerationMMPerSquareSecond[E_AXIS_ARRAY] = {MAX_TRAVE
 unsigned long Printer::maxPrintAccelerationStepsPerSquareSecond[E_AXIS_ARRAY];
 /** Acceleration in steps/s^2 in movement mode.*/
 unsigned long Printer::maxTravelAccelerationStepsPerSquareSecond[E_AXIS_ARRAY];
-uint32_t Printer::maxInterval;
+// uint32_t Printer::maxInterval;
 #endif
 #if NONLINEAR_SYSTEM
 long Printer::currentNonlinearPositionSteps[E_TOWER_ARRAY];
@@ -202,6 +202,26 @@ bool Printer::sledParked = false;
 fast8_t Printer::wizardStackPos;
 wizardVar Printer::wizardStack[WIZARD_STACK_SIZE];
 
+#if defined(DRV_TMC2130)
+#if TMC2130_ON_X
+TMC2130Stepper* Printer::tmc_driver_x = NULL;
+#endif
+#if TMC2130_ON_Y
+TMC2130Stepper* Printer::tmc_driver_y = NULL;
+#endif
+#if TMC2130_ON_Z
+TMC2130Stepper* Printer::tmc_driver_z = NULL;
+#endif
+#if TMC2130_ON_EXT0
+TMC2130Stepper* Printer::tmc_driver_e0 = NULL;
+#endif
+#if TMC2130_ON_EXT1
+TMC2130Stepper* Printer::tmc_driver_e1 = NULL;
+#endif
+#if TMC2130_ON_EXT2
+TMC2130Stepper* Printer::tmc_driver_e2 = NULL;
+#endif
+#endif
 
 #if !NONLINEAR_SYSTEM
 void Printer::constrainDestinationCoords() {
@@ -333,7 +353,7 @@ void Printer::setFan2SpeedDirectly(uint8_t speed) {
 }
 
 bool Printer::updateDoorOpen() {
-#if defined(DOOR_PIN) && DOOR_PIN > -1 && SUPPORT_LASER
+#if defined(DOOR_PIN) && DOOR_PIN > -1 //  && SUPPORT_LASER should always be respected
     bool isOpen = isDoorOpen();
     uint8_t b = READ(DOOR_PIN) != DOOR_INVERTING;
     if(!b && isOpen) {
@@ -482,8 +502,18 @@ void Printer::updateDerivedParameter() {
         maxTravelAccelerationStepsPerSquareSecond[i] = maxTravelAccelerationMMPerSquareSecond[i] * axisStepsPerMM[i];
 #endif
     }
+	// For numeric stability we need to start accelerations at a minimum speed and hence ensure that the
+	// jerk is at least 2 * minimum speed.
+
+	// For xy moves the minimum speed is multiplied with 1.41 to enforce the condition also for diagonals since the
+	// driving axis is the problematic speed.
     float accel = RMath::max(maxAccelerationMMPerSquareSecond[X_AXIS], maxTravelAccelerationMMPerSquareSecond[X_AXIS]);
-    float minimumSpeed = accel * sqrt(2.0f / (axisStepsPerMM[X_AXIS] * accel));
+    float minimumSpeed = 1.41 * accel * sqrt(2.0f / (axisStepsPerMM[X_AXIS] * accel));
+    accel = RMath::max(maxAccelerationMMPerSquareSecond[Y_AXIS], maxTravelAccelerationMMPerSquareSecond[Y_AXIS]);
+    float minimumSpeed2 = 1.41 * accel * sqrt(2.0f / (axisStepsPerMM[Y_AXIS] * accel));
+	if(minimumSpeed2 > minimumSpeed) {
+		minimumSpeed = minimumSpeed2;
+	}
     if(maxJerk < 2 * minimumSpeed) {// Enforce minimum start speed if target is faster and jerk too low
         maxJerk = 2 * minimumSpeed;
         Com::printFLN(PSTR("XY jerk was too low, setting to "), maxJerk);
@@ -496,6 +526,7 @@ void Printer::updateDerivedParameter() {
         Com::printFLN(PSTR("Z jerk was too low, setting to "), maxZJerk);
     }
 #endif
+/*
     maxInterval = F_CPU / (minimumSpeed * axisStepsPerMM[X_AXIS]);
     uint32_t tmp = F_CPU / (minimumSpeed * axisStepsPerMM[Y_AXIS]);
     if(tmp < maxInterval)
@@ -505,6 +536,7 @@ void Printer::updateDerivedParameter() {
     if(tmp < maxInterval)
         maxInterval = tmp;
 #endif
+*/
     //Com::printFLN(PSTR("Minimum Speed:"),minimumSpeed);
     //Com::printFLN(PSTR("Minimum Speed Z:"),minimumZSpeed);
 #if DISTORTION_CORRECTION
@@ -527,9 +559,9 @@ void Printer::enablePowerIfNeeded() {
 /**
   \brief Stop heater and stepper motors. Disable power,if possible.
 */
-void Printer::kill(uint8_t only_steppers) {
-    EVENT_KILL(only_steppers);
-    if(areAllSteppersDisabled() && only_steppers) return;
+void Printer::kill(uint8_t onlySteppers) {
+    EVENT_KILL(onlySteppers);
+    if(areAllSteppersDisabled() && onlySteppers) return;
     if(Printer::isAllKilled()) return;
 #if defined(NUM_MOTOR_DRIVERS) && NUM_MOTOR_DRIVERS > 0
     disableAllMotorDrivers();
@@ -539,13 +571,13 @@ void Printer::kill(uint8_t only_steppers) {
 #if !defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT)
     disableZStepper();
 #else
-    if(!only_steppers)
+    if(!onlySteppers)
         disableZStepper();
 #endif
     Extruder::disableAllExtruderMotors();
     setAllSteppersDiabled();
     unsetHomedAll();
-    if(!only_steppers) {
+    if(!onlySteppers) {
         for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
             Extruder::setTemperatureForExtruder(0, i);
         Extruder::setHeatedBedTemperature(0);
@@ -581,6 +613,13 @@ void Printer::updateAdvanceFlags() {
 #endif
 }
 
+void Printer::moveToParkPosition() {
+  if(Printer::isHomedAll()) { // for safety move only when homed!
+	moveToReal(EEPROM::parkX(),EEPROM::parkY(),IGNORE_COORDINATE,IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS], true);
+	moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::min(zMin + zLength, currentPosition[Z_AXIS] + EEPROM::parkZ()),IGNORE_COORDINATE, Printer::maxFeedrate[Z_AXIS], true);
+  }
+}
+
 // This is for untransformed move to coordinates in printers absolute Cartesian space
 uint8_t Printer::moveTo(float x, float y, float z, float e, float f) {
     if(x != IGNORE_COORDINATE)
@@ -591,6 +630,8 @@ uint8_t Printer::moveTo(float x, float y, float z, float e, float f) {
         destinationSteps[Z_AXIS] = (z + Printer::offsetZ) * axisStepsPerMM[Z_AXIS];
     if(e != IGNORE_COORDINATE)
         destinationSteps[E_AXIS] = e * axisStepsPerMM[E_AXIS];
+	else
+		destinationSteps[E_AXIS] = currentPositionSteps[E_AXIS];
     if(f != IGNORE_COORDINATE)
         feedrate = f;
 #if NONLINEAR_SYSTEM
@@ -629,8 +670,11 @@ uint8_t Printer::moveToReal(float x, float y, float z, float e, float f, bool pa
 #if MIN_EXTRUDER_TEMP > 30
             && (Extruder::current->tempControl.currentTemperatureC > MIN_EXTRUDER_TEMP || Printer::isColdExtrusionAllowed() || Extruder::current->tempControl.sensorType == 0)
 #endif
-      )
+      ) {
         destinationSteps[E_AXIS] = e * axisStepsPerMM[E_AXIS];
+    } else {
+		destinationSteps[E_AXIS] = currentPositionSteps[E_AXIS];
+	}
     if(f != IGNORE_COORDINATE)
         feedrate = f;
 
@@ -869,6 +913,7 @@ void Printer::setup() {
 #endif
 #endif
 
+
     //Initialize Step Pins
     SET_OUTPUT(X_STEP_PIN);
     SET_OUTPUT(Y_STEP_PIN);
@@ -1091,6 +1136,39 @@ void Printer::setup() {
     WRITE(BLUE_STATUS_LED, HIGH);
     WRITE(RED_STATUS_LED, LOW);
 #endif // RED_BLUE_STATUS_LEDS
+#if defined(DRV_TMC2130)
+    // TMC2130 motor drivers
+#if TMC2130_ON_X
+    Printer::tmc_driver_x = new TMC2130Stepper(X_ENABLE_PIN, X_DIR_PIN, X_STEP_PIN, TMC2130_X_CS_PIN);
+    configTMC2130(Printer::tmc_driver_x, TMC2130_STEALTHCHOP_X, TMC2130_STALLGUARD_X,
+    TMC2130_PWM_AMPL_X, TMC2130_PWM_GRAD_X, TMC2130_PWM_AUTOSCALE_X, TMC2130_PWM_FREQ_X);
+#endif
+#if TMC2130_ON_Y > 0
+    Printer::tmc_driver_y = new TMC2130Stepper(Y_ENABLE_PIN, Y_DIR_PIN, Y_STEP_PIN, TMC2130_Y_CS_PIN);
+    configTMC2130(Printer::tmc_driver_y, TMC2130_STEALTHCHOP_Y, TMC2130_STALLGUARD_Y,
+    TMC2130_PWM_AMPL_Y, TMC2130_PWM_GRAD_Y, TMC2130_PWM_AUTOSCALE_Y, TMC2130_PWM_FREQ_Y);
+#endif
+#if TMC2130_ON_Z > 0
+    Printer::tmc_driver_z = new TMC2130Stepper(Z_ENABLE_PIN, Z_DIR_PIN, Z_STEP_PIN, TMC2130_Z_CS_PIN);
+    configTMC2130(Printer::tmc_driver_z, TMC2130_STEALTHCHOP_Z, TMC2130_STALLGUARD_Z,
+    TMC2130_PWM_AMPL_Z, TMC2130_PWM_GRAD_Z, TMC2130_PWM_AUTOSCALE_Z, TMC2130_PWM_FREQ_Z);
+#endif
+#if TMC2130_ON_EXT0 > 0
+    Printer::tmc_driver_e0 = new TMC2130Stepper(EXT0_ENABLE_PIN, EXT0_DIR_PIN, EXT0_STEP_PIN, TMC2130_EXT0_CS_PIN);
+    configTMC2130(Printer::tmc_driver_e0, TMC2130_STEALTHCHOP_EXT0, TMC2130_STALLGUARD_EXT0,
+    TMC2130_PWM_AMPL_EXT0, TMC2130_PWM_GRAD_EXT0, TMC2130_PWM_AUTOSCALE_EXT0, TMC2130_PWM_FREQ_EXT0);
+#endif
+#if TMC2130_ON_EXT1 > 0
+    Printer::tmc_driver_e1 = new TMC2130Stepper(EXT1_ENABLE_PIN, EXT1_DIR_PIN, EXT1_STEP_PIN, TMC2130_EXT1_CS_PIN);
+    configTMC2130(Printer::tmc_driver_e1, TMC2130_STEALTHCHOP_EXT1, TMC2130_STALLGUARD_EXT1,
+    TMC2130_PWM_AMPL_EXT1, TMC2130_PWM_GRAD_EXT1, TMC2130_PWM_AUTOSCALE_EXT1, TMC2130_PWM_FREQ_EXT1);
+#endif
+#if TMC2130_ON_EXT2 > 0
+    Printer::tmc_driver_e2 = new TMC2130Stepper(EXT2_ENABLE_PIN, EXT2_DIR_PIN, EXT2_STEP_PIN, TMC2130_EXT2_CS_PIN);
+    configTMC2130(Printer::tmc_driver_e2, TMC2130_STEALTHCHOP_EXT2, TMC2130_STALLGUARD_EXT2,
+    TMC2130_PWM_AMPL_EXT2, TMC2130_PWM_GRAD_EXT2, TMC2130_PWM_AUTOSCALE_EXT2, TMC2130_PWM_FREQ_EXT2);
+#endif
+#endif // DRV_TMC2130
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
     motorCurrentControlInit(); // Set current if it is firmware controlled
 #endif
@@ -1459,6 +1537,13 @@ void Printer::homeYAxis() {
 }
 #else // Cartesian printer
 void Printer::homeXAxis() {
+#if defined(SENSORLESS_HOMING) && TMC2130_ON_X
+    while(!Printer::tmc_driver_x->stst()); // Wait for motor stand-still
+    uint32_t coolstep_speed = Printer::tmc_driver_x->coolstep_min_speed();
+    uint32_t stealth_max_sp = Printer::tmc_driver_x->stealth_max_speed();
+    bool stealth_state = Printer::tmc_driver_x->stealthChop();
+    Printer::tmcPrepareHoming(Printer::tmc_driver_x, TMC2130_TCOOLTHRS_X);
+#endif
     bool nocheck = isNoDestinationCheck();
     setNoDestinationCheck(true);
     long steps;
@@ -1545,9 +1630,22 @@ void Printer::homeXAxis() {
 #endif  // ELSE dual x axis
     setNoDestinationCheck(nocheck);
     setHoming(false);
+#if defined(SENSORLESS_HOMING) && TMC2130_ON_X
+    while(!Printer::tmc_driver_x->stst()); // Wait for motor stand-still
+    Printer::tmc_driver_x->coolstep_min_speed(coolstep_speed);
+    Printer::tmc_driver_x->stealth_max_speed(stealth_max_sp);
+    Printer::tmc_driver_x->stealthChop(stealth_state);
+#endif
 }
 
 void Printer::homeYAxis() {
+#if defined(SENSORLESS_HOMING) && TMC2130_ON_Y
+    while(!Printer::tmc_driver_y->stst()); // Wait for motor stand-still
+    uint32_t coolstep_speed = Printer::tmc_driver_y->coolstep_min_speed();
+    uint32_t stealth_max_sp = Printer::tmc_driver_y->stealth_max_speed();
+    bool stealth_state = Printer::tmc_driver_y->stealthChop();
+    Printer::tmcPrepareHoming(Printer::tmc_driver_y, TMC2130_TCOOLTHRS_Y);
+#endif
     long steps;
     if ((MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR == -1) || (MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR == 1)) {
         coordinateOffset[Y_AXIS] = 0;
@@ -1593,6 +1691,12 @@ void Printer::homeYAxis() {
 #endif
         setYHomed(true);
     }
+#if defined(SENSORLESS_HOMING) && TMC2130_ON_Y
+    while(!Printer::tmc_driver_y->stst()); // Wait for motor stand-still
+    Printer::tmc_driver_y->coolstep_min_speed(coolstep_speed);
+    Printer::tmc_driver_y->stealth_max_speed(stealth_max_sp);
+    Printer::tmc_driver_y->stealthChop(stealth_state);
+#endif
 }
 #endif
 
@@ -1654,6 +1758,13 @@ this result is wrong and we need to correct by the z change between origin and c
 ## Step 11: Set babysteps to 0
 */
 void Printer::homeZAxis() { // Cartesian homing
+#if defined(SENSORLESS_HOMING) && TMC2130_ON_Z
+    while(!Printer::tmc_driver_z->stst()); // Wait for motor stand-still
+    uint32_t coolstep_speed = Printer::tmc_driver_z->coolstep_min_speed();
+    uint32_t stealth_max_sp = Printer::tmc_driver_z->stealth_max_speed();
+    bool stealth_state = Printer::tmc_driver_z->stealthChop();
+    tmcPrepareHoming(Printer::tmc_driver_z, TMC2130_TCOOLTHRS_Z);
+#endif
     long steps;
     if ((MIN_HARDWARE_ENDSTOP_Z && Z_MIN_PIN > -1 && Z_HOME_DIR == -1) || (MAX_HARDWARE_ENDSTOP_Z && Z_MAX_PIN > -1 && Z_HOME_DIR == 1)) {
         offsetZ2 = 0;
@@ -1682,6 +1793,11 @@ void Printer::homeZAxis() { // Cartesian homing
 #endif
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0 && Z_MIN_PIN == Z_PROBE_PIN && Z_HOME_DIR == -1
         HAL::delayMilliseconds(Z_PROBE_DELAY);
+#endif
+#if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN && FEATURE_Z_PROBE
+#ifdef Z_PROBE_RUN_AFTER_EVERY_PROBE
+GCode::executeFString(PSTR(Z_PROBE_RUN_AFTER_EVERY_PROBE));
+#endif
 #endif
         PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * 2 * ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR, 0, homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR, true, true);
 #if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN && FEATURE_Z_PROBE
@@ -1740,6 +1856,12 @@ void Printer::homeZAxis() { // Cartesian homing
         Printer::zBabysteps = 0;
 #endif
     }
+#if defined(SENSORLESS_HOMING) && TMC2130_ON_Z
+    while(!Printer::tmc_driver_z->stst()); // Wait for motor stand-still
+    Printer::tmc_driver_z->coolstep_min_speed(coolstep_speed);
+    Printer::tmc_driver_z->stealth_max_speed(stealth_max_sp);
+    Printer::tmc_driver_z->stealthChop(stealth_state);
+#endif
 }
 
 /** \brief Main function for all homing operations.
@@ -2206,7 +2328,6 @@ void Printer::showJSONStatus(int type) {
         Com::print((int)3);
     else
         Com::print((int)(heatedBedController.targetTemperatureC < 30 ? 0 : 2));
-    Com::print(heatedBedController.targetTemperatureC);
 #else
     Com::print((int)0);
 #endif
@@ -2226,6 +2347,10 @@ void Printer::showJSONStatus(int type) {
     Com::print(currentPosition[Z_AXIS]); // Z
     //  "extr": [0.0, 0.0],
     Com::printF(PSTR("],\"extr\":["));
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+	    if (i) Com::print(',');
+	    Com::printFloat(extruder[i].tempControl.currentTemperatureC,1);
+    }
     //  "sfactor": 100.00,
     Com::printF(PSTR("],\"sfactor\":"), Printer::feedrateMultiply);
     //  "efactor": [100.00, 100.00],
@@ -2494,9 +2619,10 @@ void Printer::continuePrint() {
         sd.continuePrint(true);
     } else
 #endif
-        if(Printer::isMenuMode(MENU_MODE_PRINTING)) {
+        if(Printer::isMenuMode(MENU_MODE_PAUSED)) {
             GCodeSource::printAllFLN(PSTR("RequestContinue:"));
         }
+	setMenuMode(MENU_MODE_PAUSED, false);
 }
 
 void Printer::stopPrint() {
@@ -2509,9 +2635,36 @@ void Printer::stopPrint() {
     {
         GCodeSource::printAllFLN(PSTR("RequestStop:"));
     }
-    UI_RESET_MENU
+	if(!isUIErrorMessage()) {
+		UI_RESET_MENU
+	}
 }
 
+#if defined(DRV_TMC2130)
+    void Printer::configTMC2130(TMC2130Stepper* tmc_driver, bool tmc_stealthchop, int8_t tmc_sgt,
+      uint8_t tmc_pwm_ampl, uint8_t tmc_pwm_grad, bool tmc_pwm_autoscale, uint8_t tmc_pwm_freq) {
+        while(!tmc_driver->stst());                     // Wait for motor stand-still
+        tmc_driver->begin();                            // Initiate pins and registeries
+        tmc_driver->I_scale_analog(true);               // Set current reference source
+        tmc_driver->interpolate(true);                  // Set internal microstep interpolation
+        tmc_driver->pwm_ampl(tmc_pwm_ampl);             // Chopper PWM amplitude
+        tmc_driver->pwm_grad(tmc_pwm_grad);             // Velocity gradient for chopper PWM amplitude
+        tmc_driver->pwm_autoscale(tmc_pwm_autoscale);   // Chopper PWM autoscaling
+        tmc_driver->pwm_freq(tmc_pwm_freq);             // Chopper PWM frequency selection
+        tmc_driver->stealthChop(tmc_stealthchop);       // Enable extremely quiet stepping
+        tmc_driver->sg_stall_value(tmc_sgt);            // StallGuard sensitivity
+    }
 
+#if defined(SENSORLESS_HOMING)
+    void Printer::tmcPrepareHoming(TMC2130Stepper* tmc_driver, uint32_t coolstep_sp_min) {
+        while(!tmc_driver->stst());                     // Wait for motor stand-still
+        tmc_driver->stealth_max_speed(0);               // Upper speedlimit for stealthChop
+        tmc_driver->stealthChop(false);                 // Turn off stealthChop
+        tmc_driver->coolstep_min_speed(coolstep_sp_min);// Minimum speed for StallGuard trigerring
+        tmc_driver->sg_filter(false);                   // Turn off StallGuard filtering
+        tmc_driver->diag1_stall(true);                  // Signal StallGuard on DIAG1 pin
+        tmc_driver->diag1_active_high(true);            // StallGuard pulses active high
+    }
+#endif
 
-
+#endif

@@ -290,6 +290,7 @@ S = 1 : Measure zLength so homing works
 S = 2 : Like s = 1 plus store results in EEPROM for next connection.
 */
 bool runBedLeveling(int s) {
+	bool success = true;
     Printer::prepareForProbing();
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
     float actTemp[NUM_EXTRUDER];
@@ -336,6 +337,7 @@ bool runBedLeveling(int s) {
     //GCode::executeFString(Com::tZProbeStartScript);
     Plane plane;
 #if BED_CORRECTION_METHOD == 1
+	success = false;
     for(int r = 0; r < BED_LEVELING_REPETITIONS; r++) {
 #if DRIVE_SYSTEM == DELTA
         if(r > 0) {
@@ -378,8 +380,10 @@ bool runBedLeveling(int s) {
         Printer::currentPositionSteps[Z_AXIS] = currentZ * Printer::axisStepsPerMM[Z_AXIS];
         Printer::updateCurrentPosition(true); // set position based on steps position
 #if BED_CORRECTION_METHOD == 1
-        if(fabsf(plane.a) < 0.00025 && fabsf(plane.b) < 0.00025 )
+        if(fabsf(plane.a) < 0.00025 && fabsf(plane.b) < 0.00025 ) {
+			success = true;
             break;  // we reached achievable precision so we can stop
+		}
     } // for BED_LEVELING_REPETITIONS
 #if Z_HOME_DIR > 0 && MAX_HARDWARE_ENDSTOP_Z
     float zall = Printer::runZProbe(false, false, 1, false);
@@ -433,7 +437,7 @@ bool runBedLeveling(int s) {
 #endif
 #endif
 
-    return true;
+    return success;
 }
 
 #endif
@@ -521,8 +525,9 @@ bool Printer::startProbing(bool runScript, bool enforceStartHeight) {
         GCode::fatalError(PSTR("Could not activate z-probe offset due to coordinate constraints - result is inaccurate!"));
         return false;
     } else {
-	    if(runScript)
+	    if(runScript) {
 			GCode::executeFString(Com::tZProbeStartScript);
+		}
 	    float maxStartHeight = EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0) + 0.1;
 	    if(currentPosition[Z_AXIS] > maxStartHeight && enforceStartHeight) {
 		    cz = maxStartHeight;
@@ -539,6 +544,10 @@ bool Printer::startProbing(bool runScript, bool enforceStartHeight) {
         transformToPrinter(EEPROM::zProbeXOffset(), EEPROM::zProbeYOffset(), 0, dx, dy, offsetZ2);
         //Com::printFLN(PSTR("ZPOffset2:"),offsetZ2,3);
 #endif
+    }
+#else
+    if(runScript) {
+	    GCode::executeFString(Com::tZProbeStartScript);
     }
 #endif
     Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
@@ -607,6 +616,9 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
 #endif
     //int32_t updateZ = 0;
     waitForZProbeStart();
+#if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
+	HAL::delayMilliseconds(Z_PROBE_DELAY);
+#endif
     Endstops::update();
     Endstops::update(); // need to call twice for full update!
     if(Endstops::zProbe()) {

@@ -38,7 +38,7 @@ uint8_t Com::selectedLanguage;
 #define FIRMWARE_URL "https://github.com/repetier/Repetier-Firmware/"
 #endif // FIRMWARE_URL
 
-FSTRINGVALUE(Com::tFirmware, "FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:" FIRMWARE_URL " PROTOCOL_VERSION:1.0 MACHINE_TYPE:" MACHINE_TYPE " EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
+FSTRINGVALUE(Com::tFirmware, "FIRMWARE_NAME:Repetier_" REPETIER_VERSION " COMPILED:" __DATE__ " FIRMWARE_URL:" FIRMWARE_URL " PROTOCOL_VERSION:1.0 MACHINE_TYPE:" MACHINE_TYPE " EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
 FSTRINGVALUE(Com::tDebug, "Debug:")
 FSTRINGVALUE(Com::tOk, "ok")
 FSTRINGVALUE(Com::tNewline, "\r\n")
@@ -205,9 +205,10 @@ FSTRINGVALUE(Com::tAPIDMax, " max: ")
 FSTRINGVALUE(Com::tAPIDKu, " Ku: ")
 FSTRINGVALUE(Com::tAPIDTu, " Tu: ")
 FSTRINGVALUE(Com::tAPIDClassic, " Classic PID")
-FSTRINGVALUE(Com::tAPIDSome, " Some Overshoot")
-FSTRINGVALUE(Com::tAPIDNone, " No Overshoot")
-FSTRINGVALUE(Com::tAPIDPessen, " Pessen Integral Rule")
+FSTRINGVALUE(Com::tAPIDSome, " Some Overshoot PID")
+FSTRINGVALUE(Com::tAPIDNone, " No Overshoot PID")
+FSTRINGVALUE(Com::tAPIDPessen, " Pessen Integral Rule PID")
+FSTRINGVALUE(Com::tAPIDTyreusLyben," Tyreus-Lyben PID")
 FSTRINGVALUE(Com::tAPIDKp, " Kp: ")
 FSTRINGVALUE(Com::tAPIDKi, " Ki: ")
 FSTRINGVALUE(Com::tAPIDKd, " Kd: ")
@@ -465,7 +466,10 @@ FSTRINGVALUE(Com::tPrinterModeCNC, "PrinterMode:CNC")
 #ifdef STARTUP_GCODE
 FSTRINGVALUE(Com::tStartupGCode, STARTUP_GCODE)
 #endif
-
+#ifdef DRV_TMC2130
+FSTRINGVALUE(Com::tTrinamicMotorCurrent,  "Trinamic motor current:")
+FSTRINGVALUE(Com::tTrinamicMicrostepMode, "Trinamic microstep mode:")
+#endif
 bool Com::writeToAll = true; // transmit start messages to all devices!
 
 void Com::cap(FSTRINGPARAM(text)) {

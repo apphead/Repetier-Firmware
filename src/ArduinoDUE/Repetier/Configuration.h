@@ -63,6 +63,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // DUE3DOM                      = 410
 // DUE3DOM MINI                 = 411
 // STACKER 3D Superboard        = 412
+// RURAMPS4D                    = 414
 // Alligator Board rev1         = 500
 // Alligator Board rev2         = 501
 // Alligator Board rev3         = 502
@@ -897,7 +898,12 @@ on this endstop.
 // Inverting axis direction
 #define INVERT_X_DIR true
 #define INVERT_Y_DIR true
+#define INVERT_Y_DIR 1
+#define INVERT_Y2_DIR 1
 #define INVERT_Z_DIR false
+#define INVERT_Z2_DIR 1
+#define INVERT_Z3_DIR 1
+#define INVERT_Z4_DIR 1
 
 //// ENDSTOP SETTINGS:
 // Sets direction of endstops when homing; 1=MAX, -1=MIN
@@ -956,6 +962,16 @@ on this endstop.
 #define X_MIN_POS -23
 #define Y_MIN_POS -15
 #define Z_MIN_POS 0
+
+// Park position used when pausing from firmware side
+#if DRIVE_SYSTEM == DELTA
+#define PARK_POSITION_X (0)
+#define PARK_POSITION_Y (70)
+#else 
+#define PARK_POSITION_X (X_MIN_POS)
+#define PARK_POSITION_Y (Y_MIN_POS + Y_MAX_LENGTH)
+#endif
+#define PARK_POSITION_Z_RAISE 10
 
 // ##########################################################################################
 // ##                           Movement settings                                          ##
@@ -1075,7 +1091,7 @@ Mega. Used only for nonlinear systems like delta or tuga. */
     Set value to 0 for disabled.
     Overridden if EEPROM activated.
 */
-#define MAX_INACTIVE_TIME 0
+#define MAX_INACTIVE_TIME 0L
 /** Maximum feedrate, the system allows. Higher feedrates are reduced to these values.
     The axis order in all axis related arrays is X, Y, Z
      Overridden if EEPROM activated.
@@ -1396,6 +1412,70 @@ extruder position. In that case you can also have different resolutions for the
 to print an object two times at the speed of one. Works only with dual extruder setup.
 */
 #define FEATURE_DITTO_PRINTING 0
+// ##########################################################################################
+// ##                        Trinamic TMC2130 driver configuration                         ##
+// ##########################################################################################
+
+/* If you want to use TMC2130 specific features uncomment next line and make sure all
+following settings are correct. 
+You need this library to compile:
+https://github.com/teemuatlut/TMC2130Stepper
+
+*/
+
+// #define DRV_TMC2130
+
+// Uncomment if you use the stall guard for homing. Only for cartesian printers and xy direction
+// #define SENSORLESS_HOMING
+
+// The drivers with set CS pin will be used, all others are normal step/dir/enable drivers
+#define TMC2130_X_CS_PIN -1
+#define TMC2130_Y_CS_PIN -1
+#define TMC2130_Z_CS_PIN -1
+#define TMC2130_EXT0_CS_PIN -1
+#define TMC2130_EXT1_CS_PIN -1
+#define TMC2130_EXT2_CS_PIN -1
+
+// Per-axis current setting in mA { X, Y, Z, E0, E1, E2}
+#define MOTOR_CURRENT {1000,1000,1000,1000,1000,1000}
+
+/**  Global settings - these apply to all configured drivers
+     Per-axis values will override these
+*/
+#define TMC2130_STEALTHCHOP         1  // Enable extremely quiet stepping
+#define TMC2130_INTERPOLATE_256  true  // Enable internal driver microstep interpolation
+#define TMC2130_STALLGUARD          0  // Sensorless homing sensitivity (between -63 and +64)
+
+/** PWM values for chopper tuning
+    only change if you know what you're doing
+*/
+#define TMC2130_PWM_AMPL          255
+#define TMC2130_PWM_GRAD            1
+#define TMC2130_PWM_AUTOSCALE    true
+#define TMC2130_PWM_FREQ            2
+
+/**  Per-axis parameters
+
+  To define different values for certain parameters on each axis,
+  append either _X, _Y, _Z, _EXT0, _EXT1 or _EXT2 
+  to the name of the global parameter.
+
+  Examples for the X axis:
+
+  #define TMC2130_STEALTHCHOP_X         1
+  #define TMC2130_INTERPOLATE_256_X  true
+*/
+
+/** Minimum speeds for stall detection.
+
+  These values may need to be adjusted if SENSORLESS_HOMING is enabled,
+  but endstops trigger prematurely or don't trigger at all. 
+  The exact value is dependent on the duration of one microstep,
+  but good approximations can be determined by experimentation.
+*/
+#define TMC2130_TCOOLTHRS_X 300
+#define TMC2130_TCOOLTHRS_Y 300
+#define TMC2130_TCOOLTHRS_Z 300
 
 /* Servos
 
@@ -1553,7 +1633,7 @@ motorized bed leveling */
  *     and that it is perpendicular to the towers
  *     and that the (0,0) is in center
  * requires z-probe
- * G29 measures the Z offset in matrix NxN points (due to nature of the delta printer, the corners are extrapolated instead of measured)
+ * G33 measures the Z offset in matrix NxN points (due to nature of the delta printer, the corners are extrapolated instead of measured)
  * and compensate the distortion
  * more points means better compensation, but consumes more memory and takes more time
  * DISTORTION_CORRECTION_R is the distance of last row or column from center
@@ -1719,7 +1799,10 @@ The following settings override uiconfig.h!
 20 or CONTROLLER_BAM_DICE_DUE  DAM&DICE Due LCD Display
 21 or CONTROLLER_VIKI2 Panucatt Viki2 graphic lcd
 24 or CONTROLLER_ZONESTAR = Zonestar P802M with LCD 20x4 and 5 ADC button keypad
-405 or CONTROLLER_FELIX_DUE Felix LCD fÃ¼r due based board
+25 or CONTROLLER_ORCABOTXXLPRO2 
+26 or CONTROLLER_AZSMZ_12864 
+405 or CONTROLLER_FELIX_DUE Felix LCD für due based board
+27 or CONTROLLER_REPRAPWORLD_GLCD = ReprapWorld Graphical LCD
 */
 #define FEATURE_CONTROLLER CONTROLLER_RADDS
 
@@ -1842,6 +1925,7 @@ Values must be in range 1..255
 
 #define NUM_MOTOR_DRIVERS 0
 // #define MOTOR_DRIVER_x StepperDriver<int stepPin, int dirPin, int enablePin,bool invertDir, bool invertEnable>(float stepsPerMM,float speed)
+// #define MOTOR_DRIVER_x StepperDriverWithEndstop<int stepPin, int dirPin, int enablePin,bool invertDir, bool invertEnable,int endstop_pin,bool minEndstop,minEndstop, bool endstopPullup> var(300,10,50)
 #define MOTOR_DRIVER_1(var) StepperDriver<E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN, false, false> var(100.0f,5.0f)
 
 /*

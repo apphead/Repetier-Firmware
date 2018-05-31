@@ -37,7 +37,7 @@ uint8_t Extruder::activeMixingExtruder = 0;
 extern int16_t read_max6675(uint8_t ss_pin, fast8_t idx);
 #endif
 #ifdef SUPPORT_MAX31855
-extern int16_t read_max31855(uint8_t ss_pin);
+extern int16_t read_max31855(uint8_t ss_pin, fast8_t idx);
 #endif
 
 #if ANALOG_INPUTS > 0
@@ -135,7 +135,7 @@ void Extruder::manageTemperatures() {
 
         // Check for obvious sensor errors
         if((act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE) &&
-                act->targetTemperatureC > MIN_DEFECT_TEMPERATURE /*is heating*/ &&
+                act->targetTemperatureC > 0 /*is heating*/ &&
                 (act->preheatTime() == 0 || act->preheatTime() >= MILLISECONDS_PREHEAT_TIME /*preheating time is over*/)) { // no temp sensor or short in sensor, disable heater
             errorDetected = 1;
             if(extruderTempErrors < 10)    // Ignore short temporary failures
@@ -163,6 +163,7 @@ void Extruder::manageTemperatures() {
                     newDefectFound = true;
                     Printer::setAnyTempsensorDefect();
                     reportTempsensorError();
+                    UI_MESSAGE(2);
                 }
                 EVENT_HEATER_DEFECT(controller);
             }
@@ -332,14 +333,12 @@ void Extruder::manageTemperatures() {
         }
 #if defined(KILL_IF_SENSOR_DEFECT) && KILL_IF_SENSOR_DEFECT > 0
         if(!Printer::debugDryrun() && PrintLine::linesCount > 0) {  // kill printer if actually printing
-#if SDSUPPORT
-            sd.stopPrint();
-#endif // SDSUPPORT
-            Printer::kill(0);
+			Printer::stopPrint();
+            Printer::kill(false);
         }
 #endif // KILL_IF_SENSOR_DEFECT
         Printer::debugSet(8); // Go into dry mode
-        GCode::fatalError(PSTR("Heater/sensor failure"));
+        GCode::fatalError(PSTR("Heater/sensor error"));
     } // any sensor defect
 #endif // NUM_TEMPERATURE_LOOPS
 
@@ -350,7 +349,6 @@ void Extruder::manageTemperatures() {
             Printer::lastTempReport = now;
             Commands::printTemperatures();
         }
-
     }
 }
 
@@ -827,20 +825,6 @@ void Extruder::selectExtruderById(uint8_t extruderId) {
     Printer::offsetY = -next->yOffset * Printer::invAxisStepsPerMM[Y_AXIS];
     Printer::offsetZ = -next->zOffset * Printer::invAxisStepsPerMM[Z_AXIS];
     Commands::changeFlowrateMultiply(Printer::extrudeMultiply); // needed to adjust extrusionFactor to possibly different diameter
-#if DUAL_X_AXIS == 0 || LAZY_DUAL_X_AXIS == 0
-#if RAISE_Z_ON_TOOLCHANGE > 0 && !LAZY_DUAL_X_AXIS
-    if (Printer::isZHomed()) {
-        Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, cz, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
-        Printer::lastCmdPos[Z_AXIS] = lastZ;
-    }
-#endif
-
-    if(Printer::isHomedAll()) {
-        Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
-    }
-#endif
-    Printer::feedrate = oldfeedrate;
-    Printer::updateCurrentPosition(true);
 #if USE_ADVANCE
     HAL::resetExtruderDirection();
 #endif // USE_ADVANCE
@@ -851,6 +835,20 @@ void Extruder::selectExtruderById(uint8_t extruderId) {
         GCode::executeFString(next->selectCommands);
     }
 #endif
+#if DUAL_X_AXIS == 0 || LAZY_DUAL_X_AXIS == 0
+#if RAISE_Z_ON_TOOLCHANGE > 0 && !LAZY_DUAL_X_AXIS
+	if (Printer::isZHomed()) {
+		Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, cz, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+		Printer::lastCmdPos[Z_AXIS] = lastZ;
+	}
+#endif
+
+	if(Printer::isHomedAll()) {
+		Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
+	}
+#endif
+	Printer::feedrate = oldfeedrate;
+	Printer::updateCurrentPosition(true);
 #endif
 }
 
@@ -1970,7 +1968,7 @@ const short temptable_4[NUMTEMPS_4][2] PROGMEM = {
 // ATC 104GT
 #define NUMTEMPS_8 34
 const short temptable_8[NUMTEMPS_8][2] PROGMEM = {
-    {0, 8000}, {69, 2400}, {79, 2320}, {92, 2240}, {107, 2160}, {125, 2080}, {146, 2000}, {172, 1920}, {204, 1840}, {222, 1760}, {291, 1680}, {350, 1600},
+    {0, 8000}, {69, 2400}, {79, 2320}, {92, 2240}, {107, 2160}, {125, 2080}, {146, 2000}, {172, 1920}, {204, 1840}, {244, 1760}, {291, 1680}, {350, 1600},
     {422, 1520}, {511, 1440}, {621, 1360}, {755, 1280}, {918, 1200}, {1114, 1120}, {1344, 1040}, {1608, 960}, {1902, 880}, {2216, 800}, {2539, 720},
     {2851, 640}, {3137, 560}, {3385, 480}, {3588, 400}, {3746, 320}, {3863, 240}, {3945, 160}, {4002, 80}, {4038, 0}, {4061, -80}, {4075, -160}
 };
@@ -2166,13 +2164,22 @@ void TemperatureController::updateCurrentTemperature() {
 #endif
 #ifdef SUPPORT_MAX6675
     case 101: // MAX6675
-        currentTemperature = read_max6675(sensorPin, pwmIndex);
+		{
+			int newTemp = read_max6675(sensorPin, pwmIndex);
+			if(newTemp != 2000) {
+				currentTemperature = newTemp;
+			}
+		}
         break;
 #endif
 #ifdef SUPPORT_MAX31855
-    case 102: // MAX31855
-        currentTemperature = read_max31855(sensorPin);
-        break;
+    case 102: { // MAX31855
+        int16_t newTemp = read_max31855(sensorPin, pwmIndex);
+        if(newTemp != 20000) { // don't use error read
+            currentTemperature = newTemp;
+        }
+    }
+    break;
 #endif
     default:
         currentTemperature = 4095; // unknown method, return high value to switch heater off for safety
@@ -2331,7 +2338,7 @@ void TemperatureController::updateCurrentTemperature() {
 }
 
 void TemperatureController::setTargetTemperature(float target) {
-	ENSURE_POWER
+    ENSURE_POWER
     targetTemperatureC = target;
     stopDecouple();
 }
@@ -2350,7 +2357,7 @@ void Extruder::disableAllHeater() {
 
 void TemperatureController::autotunePID(float temp, uint8_t controllerId, int maxCycles, bool storeValues, int method) {
     if(method < 0) method = 0;
-    if(method > 3) method = 3;
+    if(method > 4) method = 4;
     float currentTemp;
     int cycles = 0;
     bool heating = true;
@@ -2444,6 +2451,12 @@ void TemperatureController::autotunePID(float temp, uint8_t controllerId, int ma
                             Kd = Kp * Tu * 3.0 / 20.0;
                             Com::printFLN(Com::tAPIDPessen);
                         }
+						if(method == 4) { //Tyreus-Lyben
+						   Kp = 0.4545f*Ku;      //1/2.2 KRkrit
+			               Ki = Kp/Tu/2.2f;        //2.2 Tkrit
+	                       Kd = Kp*Tu/6.3f;      //1/6.3 Tkrit[/code]
+	                       Com::printFLN(Com::tAPIDTyreusLyben);
+						}
                         Com::printFLN(Com::tAPIDKp, Kp);
                         Com::printFLN(Com::tAPIDKi, Ki);
                         Com::printFLN(Com::tAPIDKd, Kd);
@@ -2485,7 +2498,7 @@ void TemperatureController::autotunePID(float temp, uint8_t controllerId, int ma
         }
         UI_MEDIUM;
         UI_SLOW(true);
-    }
+    } // loop
 }
 
 /** \brief Writes monitored temperatures.
@@ -2552,7 +2565,19 @@ int16_t read_max6675(uint8_t ss_pin, fast8_t idx) {
 }
 #endif
 #ifdef SUPPORT_MAX31855
-int16_t read_max31855(uint8_t ss_pin) {
+/*
+Thermocouple with spi interface
+https://datasheets.maximintegrated.com/en/ds/MAX31855.pdf
+*/
+int16_t read_max31855(uint8_t ss_pin, fast8_t idx) {
+    static bool firstRun = true;
+    static int8_t max31855_errors[NUM_PWM];
+    if(firstRun) {
+	    for(fast8_t i = 0; i < NUM_PWM; i++) {
+		    max31855_errors[i] = 0;
+	    }
+	    firstRun = false;
+    }
     uint32_t data = 0;
     int16_t temperature;
     HAL::spiInit(2);
@@ -2567,9 +2592,12 @@ int16_t read_max31855(uint8_t ss_pin) {
     HAL::digitalWrite(ss_pin, 1);  // disable TT_MAX31855
 
     //Process temp
-    if (data & 0x00010000)
+    if (data & 65536 /* 0x00010000 */) { // test error flag
+		if( max31855_errors[idx] > 5)
+			return -396; // will trigger defect when heating, -99°C so it fits into display
+		max31855_errors[idx]++;
         return 20000; //Some form of error.
-    else {
+    } else {
         data = data >> 18;
         temperature = data & 0x00001FFF;
 
@@ -2577,6 +2605,7 @@ int16_t read_max31855(uint8_t ss_pin) {
             data = ~data;
             temperature = -1 * ((data & 0x00001FFF) + 1);
         }
+		max31855_errors[idx] = 0;
     }
     return temperature;
 }

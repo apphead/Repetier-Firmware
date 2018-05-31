@@ -233,6 +233,7 @@ FSTRINGVAR(tAPIDClassic)
 FSTRINGVAR(tAPIDSome)
 FSTRINGVAR(tAPIDNone)
 FSTRINGVAR(tAPIDPessen)
+FSTRINGVAR(tAPIDTyreusLyben)
 FSTRINGVAR(tAPIDKp)
 FSTRINGVAR(tAPIDKi)
 FSTRINGVAR(tAPIDKd)
@@ -475,6 +476,10 @@ FSTRINGVAR(tStartupGCode)
 #if NONLINEAR_SYSTEM
 FSTRINGVAR(tEPRSegmentsPerSecondPrint)
 FSTRINGVAR(tEPRSegmentsPerSecondTravel)
+#endif
+#ifdef DRV_TMC2130
+FSTRINGVAR(tTrinamicMotorCurrent)
+FSTRINGVAR(tTrinamicMicrostepMode)
 #endif
 
 static void cap(FSTRINGPARAM(text));

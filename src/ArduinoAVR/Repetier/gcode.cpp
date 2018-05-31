@@ -1168,7 +1168,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
 #else    
 	if(wasLastCommandReceivedAsBinary && !hasChecksum && fromSerial && !waitUntilAllCommandsAreParsed) {
 #endif        
-		Com::printErrorFLN("Checksum required when switching back to ASCII protocol.");
+		Com::printErrorFLN(PSTR("Checksum required when switching back to ASCII protocol."));
 		return false;
 	}
     if(hasFormatError() /*|| (params & 518) == 0*/)   // Must contain G, M or T command and parameter need to have variables!
@@ -1292,17 +1292,17 @@ void GCode::fatalError(FSTRINGPARAM(message)) {
     Printer::stopPrint();
 	if(Printer::currentPosition[Z_AXIS] < Printer::zMin + Printer::zLength - 15)
 		PrintLine::moveRelativeDistanceInSteps(0, 0, 10 * Printer::axisStepsPerMM[Z_AXIS], 0, Printer::homingFeedrate[Z_AXIS], true, true);
-	EVENT_FATAL_ERROR_OCCURED		
+	EVENT_FATAL_ERROR_OCCURED
 	Commands::waitUntilEndOfAllMoves();
-	reportFatalError();
 	Printer::kill(false);
+	reportFatalError();
 }
 
 void GCode::reportFatalError() {
     Com::writeToAll = true;
 	Com::printF(Com::tFatal);
 	Com::printF(fatalErrorMsg);
-	Com::printFLN(PSTR(" Printer stopped and heaters disabled due to this error. Fix error and restart with M999."));
+	Com::printFLN(PSTR(" - Printer stopped and heaters disabled due to this error. Fix error and restart with M999."));
 	UI_ERROR_P(fatalErrorMsg)
 }
 
@@ -1311,7 +1311,8 @@ void GCode::resetFatalError() {
 	TemperatureController::resetAllErrorStates();
 	Printer::debugReset(8); // disable dry run
 	fatalErrorMsg = NULL;
-	UI_ERROR("");
+	UI_ERROR_P(PSTR(""));
+	Printer::setUIErrorMessage(false); // allow overwrite
 	EVENT_CONTINUE_FROM_FATAL_ERROR
 	Com::printFLN(PSTR("info:Continue from fatal state"));
 }

@@ -24,6 +24,7 @@ STEPPER_CURRENT_CONTROL
 #define CURRENT_CONTROL_LTC2600 3  // Use LTC2600 like Foltyn 3D Master
 #define CURRENT_CONTROL_ALLIGATOR 4  //Use External DAC like Alligator
 #define CURRENT_CONTROL_MCP4728 5  // Use an i2c DAC as a digipot like PrintrBoard Rev. F
+#define CURRENT_CONTROL_TMC2130 6  // Trinamic TMC2130 configured via SPI
 
 /****************************************************************************************
 * Arduino pin assignment
@@ -1014,8 +1015,8 @@ STEPPER_CURRENT_CONTROL
 // (extruder)
 #define HEATER_0_PIN       13 
 #define HEATER_2_PIN       -1
-// bed (change to 12 for breakout pin on header)
-#define HEATER_1_PIN     10 
+// bed was 10 in older versions,but 12 seems to be correct
+#define HEATER_1_PIN     12 
 
 #define ORIG_X_ENABLE_PIN       14
 #define ORIG_Y_ENABLE_PIN       14
