@@ -73,8 +73,8 @@ void SDCard::initsd() {
         return;
 #endif
     HAL::pingWatchdog();
-    HAL::delayMilliseconds(50); // wait for stabilization of contacts, bootup ...
-    fat.begin(SDSS, SD_SCK_MHZ(50)); // dummy init of SD_CARD
+    HAL::delayMilliseconds(150); // wait for stabilization of contacts, bootup ...
+    fat.begin(SDSS, SD_SCK_MHZ(5)); // dummy init of SD_CARD
     HAL::delayMilliseconds(50);       // wait for init end
     HAL::pingWatchdog();
     /*if(dir[0].isOpen())

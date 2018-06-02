@@ -166,11 +166,11 @@ pins. Separate multiple GCODEs with \n
 /** \brief Number of steps for a 1mm move in x direction.
 For xy gantry use 2*belt moved!
 Overridden if EEPROM activated. */
-#define XAXIS_STEPS_PER_MM 200
+#define XAXIS_STEPS_PER_MM 315
 /** \brief Number of steps for a 1mm move in y direction.
 For xy gantry use 2*belt moved!
 Overridden if EEPROM activated.*/
-#define YAXIS_STEPS_PER_MM 200
+#define YAXIS_STEPS_PER_MM 400
 /** \brief Number of steps for a 1mm move in z direction  Overridden if EEPROM activated.*/
 #define ZAXIS_STEPS_PER_MM 1590
 #endif
@@ -216,11 +216,11 @@ controlled by settings in extruder 0 definition. */
 /* Speed in mm/s for extruder moves fom internal commands, e.g. switching extruder. */
 #define EXTRUDER_SWITCH_XY_SPEED 100
 
-#define EXT0_X_OFFSET 0
+#define EXT0_X_OFFSET - (XAXIS_STEPS_PER_MM *90)
 #define EXT0_Y_OFFSET 0
 #define EXT0_Z_OFFSET 0
-// for skeinforge 40 and later, steps to pull the plastic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
-#define EXT0_STEPS_PER_MM 1395 //425 // 825.698 //457
+#define EXT0_STEPS_PER_MM 958
+
 // What type of sensor is used?
 // 1 is 100k thermistor (Epcos B57560G0107F000 - RepRap-Fab.org and many other)
 // 2 is 200k thermistor
@@ -247,9 +247,9 @@ controlled by settings in extruder 0 definition. */
 // 102 is MAX31855
 #define EXT0_TEMPSENSOR_TYPE 1
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
-#define EXT0_TEMPSENSOR_PIN TEMP_0_PIN //Claude Correct
+#define EXT0_TEMPSENSOR_PIN TEMP_0_PIN
 // Which pin enables the heater
-#define EXT0_HEATER_PIN HEATER_0_PIN //Claude Correct
+#define EXT0_HEATER_PIN HEATER_0_PIN
 #define EXT0_STEP_PIN E4_STEP_PIN
 #define EXT0_DIR_PIN E4_DIR_PIN
 // set to false/true for normal / inverse direction
@@ -335,8 +335,8 @@ to 0 to disable.
 /** You can run any GCODE command on extruder deselect/select. Separate multiple commands with a new line \n.
 That way you can execute some mechanical components needed for extruder selection or retract filament or whatever you need.
 The codes are only executed for multiple extruder when changing the extruder. */
-#define EXT0_SELECT_COMMANDS "M117 Extruder 1"
-#define EXT0_DESELECT_COMMANDS ""
+#define EXT0_SELECT_COMMANDS "M117 Select Extruder 1"
+#define EXT0_DESELECT_COMMANDS "M117 Deselect Extruder 0"
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the extruder on, the fan goes on. */
 #define EXT0_EXTRUDER_COOLER_PIN ORIG_FAN2_PIN
 /** PWM speed for the cooler fan. 0=off 255=full speed */
@@ -350,11 +350,11 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT0_PREHEAT_TEMP 190
 
 // =========================== Configuration for second extruder ========================
-#define EXT1_X_OFFSET 5400
+#define EXT1_X_OFFSET XAXIS_STEPS_PER_MM * 330 //Claude IMPORTANT: Offset relative to theoretical 0 of bed and NOT distance to EXT0
 #define EXT1_Y_OFFSET 0
 #define EXT1_Z_OFFSET 0
 // for skeinforge 40 and later, steps to pull the plastic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
-#define EXT1_STEPS_PER_MM 1395
+#define EXT1_STEPS_PER_MM EXT0_STEPS_PER_MM
 // What type of sensor is used?
 // 1 is 100k thermistor (Epcos B57560G0107F000 - RepRap-Fab.org and many other)
 // 2 is 200k thermistor
@@ -376,9 +376,9 @@ The codes are only executed for multiple extruder when changing the extruder. */
 // 101 is MAX6675
 #define EXT1_TEMPSENSOR_TYPE 1
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
-#define EXT1_TEMPSENSOR_PIN TEMP_2_PIN //Claude Correct
+#define EXT1_TEMPSENSOR_PIN TEMP_2_PIN
 // Which pin enables the heater
-#define EXT1_HEATER_PIN HEATER_2_PIN //Claude Correct
+#define EXT1_HEATER_PIN HEATER_2_PIN
 #define EXT1_STEP_PIN E3_STEP_PIN
 #define EXT1_DIR_PIN E3_DIR_PIN
 // set to false/true for normal/inverse direction
@@ -454,8 +454,8 @@ cog. Direct drive extruder need 0. */
 
 #define EXT1_WAIT_RETRACT_TEMP 	150
 #define EXT1_WAIT_RETRACT_UNITS	0
-#define EXT1_SELECT_COMMANDS "M117 Extruder 2"
-#define EXT1_DESELECT_COMMANDS ""
+#define EXT1_SELECT_COMMANDS "M117 Eelect Extruder 2"
+#define EXT1_DESELECT_COMMANDS "M117 Deselect Extruder 1"
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the extruder on, the fan goes on. */
 #define EXT1_EXTRUDER_COOLER_PIN ORIG_FAN2_PIN
 /** PWM speed for the cooler fan. 0=off 255=full speed */
@@ -684,9 +684,9 @@ Value is used for all generic tables created. */
 // set to 0 if you don't have a heated bed
 #define HEATED_BED_SENSOR_TYPE 1
 /** Analog pin of analog sensor to read temperature of heated bed.  */
-#define HEATED_BED_SENSOR_PIN TEMP_1_PIN //Claude correct
+#define HEATED_BED_SENSOR_PIN TEMP_1_PIN
 /** \brief Pin to enable heater for bed. */
-#define HEATED_BED_HEATER_PIN HEATER_1_PIN //Claude correct
+#define HEATED_BED_HEATER_PIN HEATER_1_PIN
 // How often the temperature of the heated bed is set (msec)
 #define HEATED_BED_SET_INTERVAL 3000
 
@@ -829,7 +829,7 @@ on this endstop.
 #define ENDSTOP_X_MAX_INVERTING true
 #define ENDSTOP_Y_MAX_INVERTING false
 #define ENDSTOP_Z_MAX_INVERTING true
-#define ENDSTOP_Z2_MINMAX_INVERTING true
+#define ENDSTOP_Z2_MINMAX_INVERTING true //Claude
 
 // Set the values true where you have a hardware endstop. The Pin number is taken from pins.h.
 
@@ -838,7 +838,7 @@ on this endstop.
 #define MIN_HARDWARE_ENDSTOP_Z true
 #define MAX_HARDWARE_ENDSTOP_X true
 #define MAX_HARDWARE_ENDSTOP_Y false
-#define MAX_HARDWARE_ENDSTOP_Z true
+#define MAX_HARDWARE_ENDSTOP_Z false
 
 
 // If you have a mirrored motor you can put a second endstop to that motor.
@@ -849,7 +849,7 @@ on this endstop.
 #define ENDSTOP_PULLUP_X2_MIN false
 #define ENDSTOP_PULLUP_Y2_MIN false
 #define ENDSTOP_PULLUP_Z2_MINMAX false
-#define ENDSTOP_PULLUP_X2_MAX true
+#define ENDSTOP_PULLUP_X2_MAX false
 #define ENDSTOP_PULLUP_Y2_MAX true
 
 #define ENDSTOP_X2_MIN_INVERTING true
@@ -896,12 +896,13 @@ on this endstop.
 #define PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT
 
 // Inverting axis direction
-#define INVERT_X_DIR true
+#define INVERT_X_DIR false
+#define INVERT_X2_DIR false
 #define INVERT_Y_DIR true
 #define INVERT_Y_DIR 1
 #define INVERT_Y2_DIR 1
 #define INVERT_Z_DIR false
-#define INVERT_Z2_DIR 1
+#define INVERT_Z2_DIR false
 #define INVERT_Z3_DIR 1
 #define INVERT_Z4_DIR 1
 
@@ -942,7 +943,7 @@ on this endstop.
 // small amount back. This is also the case with H-belt systems.
 #define ENDSTOP_X_BACK_ON_HOME 1.0
 #define ENDSTOP_Y_BACK_ON_HOME 1.0
-#define ENDSTOP_Z_BACK_ON_HOME 1.0
+#define ENDSTOP_Z_BACK_ON_HOME 5.0
 
 // You can disable endstop checking for print moves. This is needed, if you get sometimes
 // false signals from your endstops. If your endstops don't give false signals, you
@@ -953,14 +954,14 @@ on this endstop.
 // For delta robot Z_MAX_LENGTH is the maximum travel of the towers and should be set to the distance between the hotend
 // and the platform when the printer is at its home position.
 // If EEPROM is enabled these values will be overridden with the values in the EEPROM
-#define X_MAX_LENGTH 243
-#define Y_MAX_LENGTH 295
+#define X_MAX_LENGTH 500 //claude
+#define Y_MAX_LENGTH 300
 #define Z_MAX_LENGTH 210
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
 // of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.
-#define X_MIN_POS -23
-#define Y_MIN_POS -15
+#define X_MIN_POS 0 //LEAVE AT 0, change value of EXT0_X_OFFSET instead!!!!
+#define Y_MIN_POS -10
 #define Z_MIN_POS 0
 
 // Park position used when pausing from firmware side
@@ -1096,14 +1097,14 @@ Mega. Used only for nonlinear systems like delta or tuga. */
     The axis order in all axis related arrays is X, Y, Z
      Overridden if EEPROM activated.
     */
-#define MAX_FEEDRATE_X 500
-#define MAX_FEEDRATE_Y 500
-#define MAX_FEEDRATE_Z 50
+#define MAX_FEEDRATE_X 3000
+#define MAX_FEEDRATE_Y 3000
+#define MAX_FEEDRATE_Z 25
 
 /** Home position speed in mm/s. Overridden if EEPROM activated. */
-#define HOMING_FEEDRATE_X 150
-#define HOMING_FEEDRATE_Y 150
-#define HOMING_FEEDRATE_Z 6
+#define HOMING_FEEDRATE_X 250
+#define HOMING_FEEDRATE_Y 250
+#define HOMING_FEEDRATE_Z 10
 
 /** Set order of axis homing. Use HOME_ORDER_XYZ and replace XYZ with your order.
  * If you measure Z with your extruder tip you need a hot extruder to get right measurement. In this
@@ -1111,7 +1112,7 @@ Mega. Used only for nonlinear systems like delta or tuga. */
  * first a z home to get some reference, then raise to ZHOME_HEAT_HEIGHT do xy homing and then after
  * heating to minimum ZHOME_MIN_TEMPERATURE will z home again for correct height.
  * */
-#define HOMING_ORDER HOME_ORDER_XYTZ //Claude: zwingend XYTZ wÃ¤hlen, sonst funktioniert BLTouch nicht!
+#define HOMING_ORDER HOME_ORDER_XYTZ //zwingend XYTZ waehlen, sonst funktioniert BLTouch nicht!
 /*
   Raise Z befor ehoming z axis
   0 = no
@@ -1123,13 +1124,13 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 */
 #define ZHOME_PRE_RAISE 2
 // Distance in mm to raise if required
-#define ZHOME_PRE_RAISE_DISTANCE 15
+#define ZHOME_PRE_RAISE_DISTANCE 5
 
 /*
  Raises Z before swapping extruder (tool change) and lowers it afterwards
  Unit is mm (INTEGER NUMBERS ONLY)
  */
-#define RAISE_Z_ON_TOOLCHANGE 0
+#define RAISE_Z_ON_TOOLCHANGE 5
 
 // Used for homing order HOME_ORDER_ZXYTZ
 #define ZHOME_MIN_TEMPERATURE 0
@@ -1141,7 +1142,7 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 // you can define a predefined x,y position so beding is always the same and
 // can be compensated. Set coordinate to 999999 to ignore positions and just
 // use the position you are at.
-#define ZHOME_X_POS 100
+#define ZHOME_X_POS 100 //claude
 #define ZHOME_Y_POS 150
 
 /* If you have a backlash in both z-directions, you can use this. For most printer, the bed will be pushed down by it's
@@ -1287,7 +1288,7 @@ Without a correct adjusted advance algorithm, you get blobs at points, where acc
 effect increases with speed and acceleration difference. Using the advance method decreases this effect.
 For more informations, read the wiki.
 */
-#define USE_ADVANCE 0
+#define USE_ADVANCE 0 //Claude 
 
 /** \brief enables quadratic component.
 
@@ -1386,7 +1387,7 @@ extruder position. In that case you can also have different resolutions for the
 2 motors. */
 #define DUAL_X_AXIS 2
 #define DUAL_X_RESOLUTION 0
-#define X2AXIS_STEPS_PER_MM 100
+#define X2AXIS_STEPS_PER_MM XAXIS_STEPS_PER_MM
 
 #define FEATURE_TWO_YSTEPPER 0
 #define Y2_STEP_PIN   E1_STEP_PIN
@@ -1538,15 +1539,15 @@ to recalibrate z.
 
 #define FEATURE_Z_PROBE true
 // Especially if you have more then 1 extruder acting as z probe this is important!
-#define EXTRUDER_IS_Z_PROBE 0
+#define EXTRUDER_IS_Z_PROBE 1
 // Disable all heaters before probing - required for inductive sensors
 #define Z_PROBE_DISABLE_HEATERS 1
 #define Z_PROBE_PIN ORIG_Z_MIN_PIN  // 63
-#define Z_PROBE_PULLUP 1
+#define Z_PROBE_PULLUP 0
 #define Z_PROBE_ON_HIGH 0
 #define Z_PROBE_X_OFFSET -46
 #define Z_PROBE_Y_OFFSET 10
-#define Z_PROBE_BED_DISTANCE 3.9 // Higher than max bed level distance error in mm
+#define Z_PROBE_BED_DISTANCE 10 // Distance probe is lifted between probe repetitions
 
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
@@ -1556,13 +1557,13 @@ to recalibrate z.
 /** Delay before going down. Needed for piezo endstops to reload safely. */
 #define Z_PROBE_DELAY 0
 #define Z_PROBE_XY_SPEED 150
-#define Z_PROBE_SWITCHING_DISTANCE 10 // Distance to safely switch off probe after it was activated
+#define Z_PROBE_SWITCHING_DISTANCE 5 // Distance to safely switch off probe after it was activated
 #define Z_PROBE_REPETITIONS 2 // Repetitions for probing at one point.
 /** The height is the difference between activated probe position and nozzle height. */
 #define Z_PROBE_HEIGHT 2.13
 /** These scripts are run before resp. after the z-probe is done. Add here code to activate/deactivate probe if needed. */
-#define Z_PROBE_START_SCRIPT "M340 P0 S700 ;"
-#define Z_PROBE_FINISHED_SCRIPT "M340 P0 S1500 ;"
+#define Z_PROBE_START_SCRIPT "M340 P0 S700"
+#define Z_PROBE_FINISHED_SCRIPT "M340 P0 S1500"
 /** Set 1 if you need a hot extruder for good probe results. Normally only required if nozzle is probe. */
 #define Z_PROBE_REQUIRES_HEATING 0
 /** Minimum extruder temperature for probing. If it is lower, it will be increased to that value. */
@@ -1599,26 +1600,18 @@ from 1 and use that as plane.
 #define BED_LEVELING_GRID_SIZE 3
 // Repetitions for motorized bed leveling
 #define BED_LEVELING_REPETITIONS 5
-/* These are the motor positions relative to bed origin. Only needed for
-motorized bed leveling */
-#define BED_MOTOR_1_X 0
-#define BED_MOTOR_1_Y 0
-#define BED_MOTOR_2_X 200
-#define BED_MOTOR_2_Y 0
-#define BED_MOTOR_3_X 100
-#define BED_MOTOR_3_Y 200
 
 /* Autoleveling allows it to z-probe 3 points to compute the inclination and compensates the error for the print.
    This feature requires a working z-probe and you should have z-endstop at the top not at the bottom.
    The same 3 points are used for the G29 command.
 */
 #define FEATURE_AUTOLEVEL true
-#define Z_PROBE_X1 20.0
-#define Z_PROBE_Y1 20.0
-#define Z_PROBE_X2 180.0
-#define Z_PROBE_Y2 20.0
-#define Z_PROBE_X3 20.0
-#define Z_PROBE_Y3 290.0
+#define Z_PROBE_X1 44 //Claude
+#define Z_PROBE_Y1 -15
+#define Z_PROBE_X2 240.0
+#define Z_PROBE_Y2 23.0
+#define Z_PROBE_X3 158.0
+#define Z_PROBE_Y3 280.0
 /* Bending correction adds a value to a measured z-probe value. This may be
   required when the z probe needs some force to trigger and this bends the
   bed down. Currently the correction values A/B/C correspond to z probe
@@ -1697,14 +1690,6 @@ Always hard to say since the other angle is 89Â° in this case!
 #define CASE_LIGHTS_PIN -1
 #define CASE_LIGHT_DEFAULT_ON 1
 
-/** Set to false to disable SD support: */
-#ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
-#define SDSUPPORT 1
-// Uncomment to enable or change card detection pin. With card detection the card is mounted on insertion.
-#define SDCARDDETECT 1
-// Change to true if you get a inserted message on removal.
-#define SDCARDDETECTINVERTED false
-#endif
 /** Show extended directory including file length. Don't use this with Pronterface! */
 #define SD_EXTENDED_DIR 0
 /** The GCODEs in this line get executed, when you stop a SD print before it was ended.
@@ -1725,12 +1710,12 @@ Separate commands by \n */
 /** Should support for fan control be compiled in. If you enable this make sure
 the FAN pin is not the same as for your second extruder. RAMPS e.g. has FAN_PIN in 9 which
 is also used for the heater if you have 2 extruders connected. */
-#define FEATURE_FAN_CONTROL true //Claude: must be true for print cooling fan, see FAN_PIN
-                                  //Claude: controlled by slicer
+#define FEATURE_FAN_CONTROL true //must be true for print cooling fan, see FAN_PIN
+                                  //controlled by slicer
 
 /* You can have a second fan controlled by adding P1 to M106/M107 command. */
-#define FEATURE_FAN2_CONTROL false //Claude: must be true for heatsink fan, see FAN2_PIN
-                                  //Claude: set starting temp with EXTRUDER_FAN_COOL_TEMP
+#define FEATURE_FAN2_CONTROL false //must be true for heatsink fan, see FAN2_PIN
+                                  //set starting temp with EXTRUDER_FAN_COOL_TEMP
 
 /* By setting FAN_BOARD_PIN to a pin number you get a board cooler. That fan
 goes on as soon as moves occur. Mainly to prevent overheating of stepper drivers. */
@@ -1804,7 +1789,16 @@ The following settings override uiconfig.h!
 405 or CONTROLLER_FELIX_DUE Felix LCD für due based board
 27 or CONTROLLER_REPRAPWORLD_GLCD = ReprapWorld Graphical LCD
 */
-#define FEATURE_CONTROLLER CONTROLLER_RADDS
+
+/*
+	which display ???
+	- full graphics smart controller is tested!
+	- row / column display is NOT TESTED - use with own testing ;)
+*/
+//#define FEATURE_CONTROLLER CONTROLLER_RADDS_LCD_16X2	// RADDS2LCD -> LCD with 16 columns and 2 rows
+//#define FEATURE_CONTROLLER CONTROLLER_RADDS_LCD_20X4	// RADDS2LCD -> LCD with 20 columns and 4 rows
+#define FEATURE_CONTROLLER CONTROLLER_RADDS_FGSC	  	// RADDS2LCD -> Full Graphics Smart Controller
+
 
 /* You can have one keypad connected via single analog pin as seen on
  some printers with Melzi V2.0 board, 20x4 LCD and 5 buttons keypad. This must be
@@ -1836,7 +1830,7 @@ computations, so do not enable it if your display works stable!
 //#define TRY_AUTOREPAIR_LCD_ERRORS
 
 // This is line 2 of the status display at startup. Change to your like.
-#define UI_PRINTER_NAME "MendelMax V2"
+#define UI_PRINTER_NAME "MendelMax V3"
 #define UI_PRINTER_COMPANY "Makerstoolswork"
 
 
@@ -1865,7 +1859,7 @@ Select an encoder speed from 0 = fastest to 2 = slowest that results in one menu
 #define UI_ENCODER_SPEED 2
 
 // Set to 1 to reverse encoder direction
-#define UI_REVERSE_ENCODER 0
+#define UI_REVERSE_ENCODER 1
 
 /* There are 2 ways to change positions. You can move by increments of 1/0.1 mm resulting in more menu entries
 and requiring many turns on your encode. The alternative is to enable speed dependent positioning. It will change
@@ -1888,7 +1882,7 @@ same setting.
 /** \brief Lowest repeat time. */
 #define UI_KEY_MIN_REPEAT 50
 
-#define FEATURE_BEEPER 1
+#define FEATURE_BEEPER 0
 /**
 Beeper sound definitions for short beeps during key actions
 and longer beeps for important actions.

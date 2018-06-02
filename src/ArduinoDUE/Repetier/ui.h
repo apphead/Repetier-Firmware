@@ -570,6 +570,13 @@ const UIMenu name PROGMEM = {5,action,5,name ## _entries};
 #define SDSUPPORT 1
 #endif
 
+// RADDS + RADDS2LCD + Full Graphics Smart Controller / other 4-bit LCD
+#if (FEATURE_CONTROLLER == CONTROLLER_RADDS_FGSC || FEATURE_CONTROLLER == CONTROLLER_RADDS_LCD_16X2 || FEATURE_CONTROLLER == CONTROLLER_RADDS_LCD_20X4)
+  #undef SDCARDDETECT
+  #define SDCARDDETECT ORIG_SDCARDDETECT
+  #undef SDSUPPORT
+  #define SDSUPPORT 1
+#endif // FEATURE_CONTROLLER == CONTROLLER_RADDS_FGSC
 
 // Maximum size of a row - if row is larger, text gets scrolled
 #if defined(UI_DISPLAY_TYPE) && UI_DISPLAY_TYPE == DISPLAY_GAMEDUINO2

@@ -649,55 +649,145 @@ void uiCheckSlowKeys(uint16_t &action) {
 }
 #endif
 #endif // Controller 6
+
 #if FEATURE_CONTROLLER == CONTROLLER_RADDS
-#undef SDSS
-#define SDSS            10
-#undef SPI_PIN
-#define SPI_PIN         77
-#undef SPI_CHAN
-#define SPI_CHAN        0
-#define UI_HAS_KEYS 1
-#define UI_HAS_BACK_KEY 1
-#define UI_DISPLAY_TYPE DISPLAY_4BIT
-#define UI_DISPLAY_CHARSET 1
-#define BEEPER_TYPE 1
-#define UI_COLS 20
-#define UI_ROWS 4
-#undef BEEPER_PIN
-#define BEEPER_PIN             41
-#define UI_DISPLAY_RS_PIN      42
-#define UI_DISPLAY_RW_PIN      -1
-#define UI_DISPLAY_ENABLE_PIN  43
-#define UI_DISPLAY_D0_PIN      44
-#define UI_DISPLAY_D1_PIN      45
-#define UI_DISPLAY_D2_PIN      46
-#define UI_DISPLAY_D3_PIN      47
-#define UI_DISPLAY_D4_PIN      44
-#define UI_DISPLAY_D5_PIN      45
-#define UI_DISPLAY_D6_PIN      46
-#define UI_DISPLAY_D7_PIN      47
-#define UI_ENCODER_A           50
-#define UI_ENCODER_B           52
-#define UI_ENCODER_CLICK       48
-#define UI_RESET_PIN           -1
-#define UI_DELAYPERCHAR 50
-#define UI_INVERT_MENU_DIRECTION 0
-#define UI_BUTTON_BACK         71
-#ifdef UI_MAIN
-void uiInitKeys() {
-  UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A, UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
-  UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
-  UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_BACK);
-}
-void uiCheckKeys(uint16_t &action) {
-  UI_KEYS_CLICKENCODER_LOW(UI_ENCODER_A, UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
-  UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK, UI_ACTION_OK); // push button, connects gnd to pin
-  UI_KEYS_BUTTON_LOW(UI_BUTTON_BACK, UI_ACTION_BACK);
-}
-inline void uiCheckSlowEncoder() {}
-void uiCheckSlowKeys(uint16_t &action) {}
-#endif
+	#undef SDSS
+	#define SDSS            10
+	#undef SPI_PIN
+	#define SPI_PIN         77
+	#undef SPI_CHAN
+	#define SPI_CHAN        0
+	#define UI_HAS_KEYS 1
+	#define UI_HAS_BACK_KEY 1
+	#define UI_DISPLAY_TYPE DISPLAY_4BIT
+	#define UI_DISPLAY_CHARSET 1
+	#define BEEPER_TYPE 1
+	#define UI_COLS 20
+	#define UI_ROWS 4
+	#undef BEEPER_PIN
+	#define BEEPER_PIN             41
+	#define UI_DISPLAY_RS_PIN      42
+	#define UI_DISPLAY_RW_PIN      -1
+	#define UI_DISPLAY_ENABLE_PIN  43
+	#define UI_DISPLAY_D0_PIN      44
+	#define UI_DISPLAY_D1_PIN      45
+	#define UI_DISPLAY_D2_PIN      46
+	#define UI_DISPLAY_D3_PIN      47
+	#define UI_DISPLAY_D4_PIN      44
+	#define UI_DISPLAY_D5_PIN      45
+	#define UI_DISPLAY_D6_PIN      46
+	#define UI_DISPLAY_D7_PIN      47
+	#define UI_ENCODER_A           50
+	#define UI_ENCODER_B           52
+	#define UI_ENCODER_CLICK       48
+	#define UI_RESET_PIN           -1
+	#define UI_DELAYPERCHAR 50
+	#define UI_INVERT_MENU_DIRECTION 0
+	#define UI_BUTTON_BACK         71
+	#ifdef UI_MAIN
+	void uiInitKeys() {
+	  UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A, UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+	  UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
+	  UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_BACK);
+	}
+	void uiCheckKeys(uint16_t &action) {
+	  UI_KEYS_CLICKENCODER_LOW(UI_ENCODER_A, UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+	  UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK, UI_ACTION_OK); // push button, connects gnd to pin
+	  UI_KEYS_BUTTON_LOW(UI_BUTTON_BACK, UI_ACTION_BACK);
+	}
+	inline void uiCheckSlowEncoder() {}
+	void uiCheckSlowKeys(uint16_t &action) {}
+	#endif
 #endif // Controller 7
+
+#if (FEATURE_CONTROLLER == CONTROLLER_RADDS_FGSC || FEATURE_CONTROLLER == CONTROLLER_RADDS_LCD_16X2 || FEATURE_CONTROLLER == CONTROLLER_RADDS_LCD_20X4)
+  #undef SDSS
+  #define SDSS            10
+  #undef SPI_PIN
+  #define SPI_PIN         77
+  #undef SPI_CHAN
+  #define SPI_CHAN        0
+  #define UI_HAS_KEYS     1
+
+  #define UI_HAS_BACK_KEY 0
+  
+  // decide which lcd is used
+  #if (FEATURE_CONTROLLER == CONTROLLER_RADDS_FGSC)
+	#define UI_DISPLAY_TYPE DISPLAY_U8G
+    #define U8GLIB_ST7920
+    #define UI_LCD_WIDTH 128
+    #define UI_LCD_HEIGHT 64
+    
+    //select font size
+    #define UI_FONT_6X10 //default font
+    #ifdef UI_FONT_6X10
+      #define UI_FONT_WIDTH 6
+      #define UI_FONT_HEIGHT 10
+      #define UI_FONT_SMALL_HEIGHT 7
+      #define UI_FONT_DEFAULT repetier_6x10
+      #define UI_FONT_SMALL repetier_5x7
+      #define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
+      #define UI_ANIMATION false  // Animations are too slow
+    #endif
+  
+    //calculate rows and cols available with current font
+    #define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
+    #define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
+    #define UI_DISPLAY_CHARSET 3
+	
+  #elif (FEATURE_CONTROLLER == CONTROLLER_RADDS_LCD_16X2)
+	#define UI_DISPLAY_TYPE DISPLAY_4BIT
+	#define UI_COLS 16
+	#define UI_ROWS 2	
+		
+  #else (FEATURE_CONTROLLER == CONTROLLER_RADDS_LCD_20X4)
+	#define UI_DISPLAY_TYPE DISPLAY_4BIT
+	#define UI_COLS 20
+	#define UI_ROWS 4	
+  #endif
+  
+  #define UI_DISPLAY_CHARSET 3
+  
+  #define BEEPER_TYPE 1
+  #undef BEEPER_PIN
+  #define BEEPER_PIN             41
+  #define UI_DISPLAY_RS_PIN      42
+  #define UI_DISPLAY_RW_PIN      -1
+  #define UI_DISPLAY_ENABLE_PIN  43
+  #define UI_DISPLAY_D0_PIN      44
+  #define UI_DISPLAY_D1_PIN      45
+  #define UI_DISPLAY_D2_PIN      46
+  #define UI_DISPLAY_D3_PIN      47
+  #define UI_DISPLAY_D4_PIN      44
+  #define UI_DISPLAY_D5_PIN      45
+  #define UI_DISPLAY_D6_PIN      46
+  #define UI_DISPLAY_D7_PIN      47
+
+  // swap these two numbers to invert rotary encoder scroll direction
+  #define UI_ENCODER_A           50
+  #define UI_ENCODER_B           52
+
+  #define UI_ENCODER_CLICK       48
+  #define UI_RESET_PIN           -1
+  #define UI_DELAYPERCHAR 50
+  #define UI_INVERT_MENU_DIRECTION 0
+  #define UI_BUTTON_BACK         71 // -1
+  
+  #ifdef UI_MAIN
+    void uiInitKeys() {
+      UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A, UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+      UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
+      UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_BACK);
+    }
+    void uiCheckKeys(uint16_t &action) {
+      UI_KEYS_CLICKENCODER_LOW(UI_ENCODER_A, UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+      UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK, UI_ACTION_OK); // push button, connects gnd to pin
+      UI_KEYS_BUTTON_LOW(UI_BUTTON_BACK, UI_ACTION_BACK);
+    }
+    inline void uiCheckSlowEncoder() {}
+    void uiCheckSlowKeys(uint16_t &action) {}
+  #endif
+#endif // controller RADDS2LCD
 
 #if FEATURE_CONTROLLER == CONTROLLER_PIBOT20X4 || FEATURE_CONTROLLER == CONTROLLER_PIBOT16X2
 

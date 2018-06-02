@@ -179,6 +179,10 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_AZSMZ_12864 26
 #define CONTROLLER_REPRAPWORLD_GLCD 27
 
+#define CONTROLLER_RADDS_LCD_16X2 997
+#define CONTROLLER_RADDS_LCD_20X4 998
+#define CONTROLLER_RADDS_FGSC 999
+
 //direction flags
 #define X_DIRPOS 1
 #define Y_DIRPOS 2
