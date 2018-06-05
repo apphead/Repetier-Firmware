@@ -139,8 +139,8 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_SDCARDDETECT       14
 #define SDCARDDETECTINVERTED 0
 #define LED_PIN 	   -1
-#define ORIG_FAN_PIN 	   9 //Hotend
-#define ORIG_FAN2_PIN           11 //Heatsink
+#define ORIG_FAN_PIN 	   9 //Print
+#define ORIG_FAN2_PIN      8 //Heatsink
 #define ORIG_PS_ON_PIN          40
 #define KILL_PIN	   -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
@@ -180,7 +180,7 @@ STEPPER_CURRENT_CONTROL
 #endif
 
 #ifndef FAN_BOARD_PIN
-#define FAN_BOARD_PIN -1
+#define FAN_BOARD_PIN 11
 #endif
 
 #if NUM_EXTRUDER < 2
@@ -283,7 +283,7 @@ STEPPER_CURRENT_CONTROL
 #define E5_ENABLE_PIN ORIG_E5_ENABLE_PIN
 
 #define FAN_PIN ORIG_FAN_PIN // Claude: FAN_PIN is print cooling fan
-#ifdef ORIG_FAN2_PIN
+#ifdef ORIG_8738i2_PIN
 #define FAN2_PIN ORIG_FAN2_PIN // Claude: FAN2_PIN is heatsink cooling fan
 #endif
 
