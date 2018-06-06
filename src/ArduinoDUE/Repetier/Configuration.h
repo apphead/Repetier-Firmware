@@ -118,7 +118,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 /* You can write some GCODE to be executed on startup. Use this e.g. to set some
 pins. Separate multiple GCODEs with \n
 */
-#define STARTUP_GCODE "M340 P0 S2200"
+#define STARTUP_GCODE "T0; M340 P0 S2200"
 
 // ##########################################################################################
 // ##                               Calibration                                            ##
@@ -1083,14 +1083,14 @@ Mega. Used only for nonlinear systems like delta or tuga. */
     This helps cooling the Stepper motors between two print jobs.
     Overridden if EEPROM activated.
 */
-#define STEPPER_INACTIVE_TIME 0
+#define STEPPER_INACTIVE_TIME 360L
 /** After x seconds of inactivity, the system will go down as far it can.
     It will at least disable all stepper motors and heaters. If the board has
     a power pin, it will be disabled, too.
     Set value to 0 for disabled.
     Overridden if EEPROM activated.
 */
-#define MAX_INACTIVE_TIME 0L
+#define MAX_INACTIVE_TIME 900L
 /** Maximum feedrate, the system allows. Higher feedrates are reduced to these values.
     The axis order in all axis related arrays is X, Y, Z
      Overridden if EEPROM activated.
@@ -1128,7 +1128,7 @@ Mega. Used only for nonlinear systems like delta or tuga. */
  Raises Z before swapping extruder (tool change) and lowers it afterwards
  Unit is mm (INTEGER NUMBERS ONLY)
  */
-#define RAISE_Z_ON_TOOLCHANGE 5
+#define RAISE_Z_ON_TOOLCHANGE 8
 
 // Used for homing order HOME_ORDER_ZXYTZ
 #define ZHOME_MIN_TEMPERATURE 0
@@ -1545,7 +1545,7 @@ to recalibrate z.
 #define Z_PROBE_ON_HIGH 0
 #define Z_PROBE_X_OFFSET -46
 #define Z_PROBE_Y_OFFSET 10
-#define Z_PROBE_BED_DISTANCE 10 // Distance probe is lifted between probe repetitions
+#define Z_PROBE_BED_DISTANCE 5 // Distance probe is lifted between probe repetitions
 
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
@@ -1554,8 +1554,8 @@ to recalibrate z.
 #define Z_PROBE_SPEED 4
 /** Delay before going down. Needed for piezo endstops to reload safely. */
 #define Z_PROBE_DELAY 0
-#define Z_PROBE_XY_SPEED 200
-#define Z_PROBE_SWITCHING_DISTANCE 5 // Distance to safely switch off probe after it was activated
+#define Z_PROBE_XY_SPEED 350
+#define Z_PROBE_SWITCHING_DISTANCE 2 // Distance to safely switch off probe after it was activated
 #define Z_PROBE_REPETITIONS 2 // Repetitions for probing at one point.
 /** The height is the difference between activated probe position and nozzle height. */
 #define Z_PROBE_HEIGHT 6.980
@@ -1897,9 +1897,9 @@ Values must be in range 1..255
 // Extreme values
 #define UI_SET_MIN_HEATED_BED_TEMP  50
 #define UI_SET_MAX_HEATED_BED_TEMP 120
-#define UI_SET_MIN_EXTRUDER_TEMP   160
+#define UI_SET_MIN_EXTRUDER_TEMP   100
 #define UI_SET_MAX_EXTRUDER_TEMP   270
-#define UI_SET_EXTRUDER_FEEDRATE 2 // mm/sec
+#define UI_SET_EXTRUDER_FEEDRATE 5 // mm/sec
 #define UI_SET_EXTRUDER_RETRACT_DISTANCE 3 // mm
 
 /*

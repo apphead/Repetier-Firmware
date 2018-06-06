@@ -1,0 +1,3 @@
+T[current_extruder];
+M104 T[previous_extruder] S170 ;lower current extruder temperature
+M109 T[current_extruder] S[temperature_[current_extruder]] ;reset printing temperature
