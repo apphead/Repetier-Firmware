@@ -485,7 +485,7 @@ It will change the current extruders filament and temperature must already be hi
 */
 #define FILAMENTCHANGE_X_POS 0
 #define FILAMENTCHANGE_Y_POS 0
-#define FILAMENTCHANGE_Z_ADD 1
+#define FILAMENTCHANGE_Z_ADD 10
 /** Does a homing procedure after a filament change. This is good in case
 you moved the extruder while changing filament during print.
 0 = no homing, 1 = xy homing, 2 = xyz homing
@@ -952,7 +952,7 @@ on this endstop.
 // For delta robot Z_MAX_LENGTH is the maximum travel of the towers and should be set to the distance between the hotend
 // and the platform when the printer is at its home position.
 // If EEPROM is enabled these values will be overridden with the values in the EEPROM
-#define X_MAX_LENGTH 500 //claude
+#define X_MAX_LENGTH 500
 #define Y_MAX_LENGTH 300
 #define Z_MAX_LENGTH 210
 
@@ -1383,6 +1383,7 @@ instead of driving both with a single stepper. The same works for the other axis
 /* Dual x axis mean having a printer with x motors and each controls one
 extruder position. In that case you can also have different resolutions for the
 2 motors. */
+#define LAZY_DUAL_X_AXIS 1 //Claude
 #define DUAL_X_AXIS 2
 #define DUAL_X_RESOLUTION 0
 #define X2AXIS_STEPS_PER_MM XAXIS_STEPS_PER_MM
@@ -1555,7 +1556,7 @@ to recalibrate z.
 /** Delay before going down. Needed for piezo endstops to reload safely. */
 #define Z_PROBE_DELAY 0
 #define Z_PROBE_XY_SPEED 350
-#define Z_PROBE_SWITCHING_DISTANCE 2 // Distance to safely switch off probe after it was activated
+#define Z_PROBE_SWITCHING_DISTANCE 5 // Distance to safely switch off probe after it was activated
 #define Z_PROBE_REPETITIONS 2 // Repetitions for probing at one point.
 /** The height is the difference between activated probe position and nozzle height. */
 #define Z_PROBE_HEIGHT 6.980
@@ -1604,7 +1605,7 @@ from 1 and use that as plane.
    The same 3 points are used for the G29 command.
 */
 #define FEATURE_AUTOLEVEL true
-#define Z_PROBE_X1 35 //Claude
+#define Z_PROBE_X1 35
 #define Z_PROBE_Y1 5
 #define Z_PROBE_X2 240
 #define Z_PROBE_Y2 5
@@ -1682,7 +1683,7 @@ Always hard to say since the other angle is 89Â° in this case!
 /* Babystepping allows to change z height during print without changing official z height */
 #define FEATURE_BABYSTEPPING 1
 /* If you have a threaded rod, you want a higher multiplicator to see an effect. Limit value to 50 or you get easily overflows.*/
-#define BABYSTEP_MULTIPLICATOR 5
+#define BABYSTEP_MULTIPLICATOR 10
 
 /* Define a pin to tuen light on/off */
 #define CASE_LIGHTS_PIN -1
@@ -1897,9 +1898,9 @@ Values must be in range 1..255
 // Extreme values
 #define UI_SET_MIN_HEATED_BED_TEMP  50
 #define UI_SET_MAX_HEATED_BED_TEMP 120
-#define UI_SET_MIN_EXTRUDER_TEMP   100
+#define UI_SET_MIN_EXTRUDER_TEMP   160
 #define UI_SET_MAX_EXTRUDER_TEMP   270
-#define UI_SET_EXTRUDER_FEEDRATE 5 // mm/sec
+#define UI_SET_EXTRUDER_FEEDRATE 2 // mm/sec
 #define UI_SET_EXTRUDER_RETRACT_DISTANCE 3 // mm
 
 /*
@@ -1924,7 +1925,7 @@ Values must be in range 1..255
   You can expand firmware functionality with events and you own event handler.
   Read Events.h for more informations. To activate, uncomment the following define.
 */
-//#define CUSTOM_EVENTS
+#define CUSTOM_EVENTS
 
 #endif
 
